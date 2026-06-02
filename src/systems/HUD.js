@@ -88,7 +88,7 @@ export default class HUD {
     this.versionText = this.scene.add.text(
       W - 8,
       H - 8,
-      'v6',
+      'v7',
       {
         fontSize: '11px',
         color: '#888888',

@@ -48,15 +48,30 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    console.log('[GameScene v7] init() data=' + JSON.stringify(data));
     if (data && data.level) {
       this.currentLevel = data.level;
     }
-    // reset touch state setiap kali scene (re)init
+    // v7: scene.start() pada scene yang sama = RESTART, bukan instance baru.
+    // Constructor TIDAK jalan lagi, jadi SEMUA state yang di-set di
+    // constructor harus di-reset manual di sini. Sebelumnya gameState
+    // tetap 'won' dari overlay level complete → input blocked di level
+    // baru → player stuck gak bisa gerak.
+    this.gameState = 'playing';
+    this.levelData = null;
+    this.pauseOverlay = null;
+    this.startTime = 0;
+    this.elapsedTime = 0;
+    this.goalIndicator = null;
+    this._autoAdvance = null;
+    this._autoAdvanceText = null;
     this.touch = { left: false, right: false, jumpCounter: 0 };
+    this._touchObjects = [];
+    // lives & score PERSIST across levels (tidak di-reset)
   }
 
   create() {
-    console.log('[GameScene v6] create() level=' + this.currentLevel);
+    console.log('[GameScene v7] create() level=' + this.currentLevel);
     try {
       this.levelData = levels.find(l => l.id === this.currentLevel);
       if (!this.levelData) {
@@ -102,11 +117,11 @@ export default class GameScene extends Phaser.Scene {
       this.input.keyboard.once('keydown', () => sound.resume());
       this.input.once('pointerdown', () => sound.resume());
 
-      console.log('[GameScene v6] create() done. coins=' +
+      console.log('[GameScene v7] create() done. coins=' +
         (this.levelData.coins || []).length +
         ' platforms=' + (this.levelData.platforms || []).length);
     } catch (err) {
-      console.error('[GameScene v6] create() error:', err);
+      console.error('[GameScene v7] create() error:', err);
       this.showError('Error di level ' + this.currentLevel + ': ' + (err && err.message ? err.message : err));
     }
   }
