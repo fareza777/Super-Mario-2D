@@ -4,11 +4,12 @@
  * Entity musuh dengan dua tipe:
  *   - 'patrol' : berjalan horizontal di area patrol, berbalik arah
  *                saat mencapai batas atau menabrak dinding.
- *                Animasi: langkah kecil (Y bounce) ketika di tanah.
  *   - 'flying' : melayang dengan pola sinus (vertikal atau both).
- *                Animasi: kepakan sayap (scaleX osilasi).
  *
- * Properti data: { type, x, y, speed?, patrolRange?, range?, axis? }
+ * v9: rewrite total — HAPUS walk-tween pada `sprite.y` (sebelumnya
+ *     conflict dengan physics: tween set y → physics step override →
+ *     fight terus-menerus → velocity.x bisa reset ke 0 → enemy diam).
+ *     Ganti dengan setScale() wobble (visual only, tidak ganggu body).
  * ---------------------------------------------------------------
  */
 export default class Enemy extends Phaser.Physics.Arcade.Sprite {
@@ -25,125 +26,89 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.range = config.range || 80;
     this.axis = config.axis || 'vertical';
     this.speed = config.speed || (isFly ? 50 : 80);
-    this.timeAccum = 0;
-    this.facing = 1;
+    this.facing = 1;  // 1 = kanan, -1 = kiri
+    this.isDying = false;
+    this._walkPhase = 0;
+    this._frameCount = 0;
 
-    this.setCollideWorldBounds(true);
-    this.setBounce(0);
     this.body.setSize(30, 30);
     this.body.setOffset(1, 1);
-
-    this.isDying = false;
+    // JANGAN setCollideWorldBounds(true) — bisa bentrok dengan patrol
+    // range. World bounds dihandle oleh physics world & platform.
 
     if (this.type === 'flying') {
-      // musuh terbang:不受重力影响，position di-update manual via sinus
       this.body.setAllowGravity(false);
-      this.setVelocity(0, 0);
       this.body.setImmovable(true);
-      // kepakan sayap: scaleX berosilasi
-      this._flapTween = scene.tweens.add({
-        targets: this,
-        scaleX: { from: 0.7, to: 1.2 },
-        scaleY: { from: 0.9, to: 1.05 },
-        duration: 180,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
+      this.setVelocity(0, 0);
     } else {
-      this.setVelocityX(this.speed);
-      // goyangan langkah (Y bounce kecil)
-      this._walkTween = scene.tweens.add({
-        targets: this,
-        y: y - 2,
-        duration: 220,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
+      this.setVelocityX(this.facing * this.speed);
     }
+
+    console.log('[Enemy v9] spawned type=' + this.type +
+      ' at(' + x + ',' + y + ') speed=' + this.speed);
   }
 
   /**
-   * Dipanggil tiap frame. Untuk 'flying' menggerakkan posisi dengan
-   * pola sinus. Untuk 'patrol' menangani pembalikan arah.
+   * Dipanggil tiap frame oleh group { runChildUpdate: true }.
+   * Untuk 'flying' menggerakkan posisi manual via sinus.
+   * Untuk 'patrol' cek batas patrol + wall hit, flip velocity.
    */
   update(time, delta) {
-    if (this.isDying) return;
+    if (this.isDying || !this.active) return;
+
+    this._frameCount += 1;
+    // log periodik supaya bisa verify update dipanggil + velocity benar
+    if (this._frameCount % 60 === 0 && this.type === 'patrol') {
+      console.log('[Enemy v9] patrol tick x=' + Math.round(this.x) +
+        ' vx=' + Math.round(this.body.velocity.x) +
+        ' facing=' + this.facing);
+    }
 
     if (this.type === 'flying') {
-      this.timeAccum += delta;
-      // asumsi: periode 500ms untuk sumbu-Y, 700ms untuk sumbu-X
-      this.y = this.startY + Math.sin(this.timeAccum / 500) * this.range;
+      this._walkPhase += delta;
+      this.y = this.startY + Math.sin(this._walkPhase / 500) * this.range;
       if (this.axis === 'both') {
-        this.x = this.startX + Math.cos(this.timeAccum / 700) * this.range;
+        this.x = this.startX + Math.cos(this._walkPhase / 700) * this.range;
       }
-      // hadap sesuai arah movement
       this.setFlipX(this.x > this.startX);
       return;
     }
 
-    // patrol
-    const v = this.body.velocity.x;
-    const speed = v !== 0 ? Math.abs(v) : this.speed;
+    // ===== patrol =====
     const reachedLeft = this.x <= this.startX - this.patrolRange;
     const reachedRight = this.x >= this.startX + this.patrolRange;
     const hitWall = this.body.blocked.left || this.body.blocked.right;
 
-    if (reachedLeft || (hitWall && v < 0)) {
-      this.setVelocityX(speed);
-      this.setFlipX(false);
-      this.facing = 1;
-      // sinkronkan walk bounce dengan posisi baru (supaya tetap di atas tanah)
-      if (this._walkTween) {
-        this._walkTween.stop();
-        this._walkTween = this.scene.tweens.add({
-          targets: this,
-          y: this.y - 2,
-          duration: 220,
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut'
-        });
-      }
-    } else if (reachedRight || (hitWall && v > 0)) {
-      this.setVelocityX(-speed);
-      this.setFlipX(true);
+    if (reachedRight || (hitWall && this.facing > 0)) {
       this.facing = -1;
-      if (this._walkTween) {
-        this._walkTween.stop();
-        this._walkTween = this.scene.tweens.add({
-          targets: this,
-          y: this.y - 2,
-          duration: 220,
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut'
-        });
-      }
-    } else {
-      this.setFlipX(v < 0);
+    } else if (reachedLeft || (hitWall && this.facing < 0)) {
+      this.facing = 1;
     }
+
+    // set velocity setiap frame supaya konsisten (tidak andalkan
+    // velocity awal saja)
+    this.setVelocityX(this.facing * this.speed);
+    this.setFlipX(this.facing < 0);
+
+    // visual wobble: scaleY oscillation, TIDAK mengganggu physics body
+    this._walkPhase += delta * 0.012;
+    const wobble = 1 + Math.abs(Math.sin(this._walkPhase)) * 0.08;
+    this.setScale(1, wobble);
   }
 
   die() {
     if (this.isDying) return;
     this.isDying = true;
-    if (this._walkTween) this._walkTween.stop();
-    if (this._flapTween) this._flapTween.stop();
     this.setTint(0x888888);
     this.setVelocity(0, -250);
     this.setAngle(-30);
     this.body.setEnable(false);
-    // spin saat terbang ke atas
     this.scene.tweens.add({
       targets: this,
       angle: 360,
       duration: 700,
       ease: 'Linear',
-      onUpdate: () => {
-        this.y -= 0.5;
-      }
+      onUpdate: () => { this.y -= 0.5; }
     });
     this.scene.time.delayedCall(700, () => this.destroy());
   }
