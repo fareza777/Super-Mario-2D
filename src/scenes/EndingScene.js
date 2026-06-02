@@ -6,6 +6,7 @@
  * ---------------------------------------------------------------
  */
 import { story } from '../data/story.js';
+import { music } from '../systems/MusicManager.js';
 
 function formatTime(ms) {
   const totalSec = Math.floor(ms / 1000);
@@ -25,6 +26,11 @@ export default class EndingScene extends Phaser.Scene {
   }
 
   create() {
+    // v11: BGM ending yang megah
+    music.playBGM('ending');
+    music.stopWind();
+    this.events.once('shutdown', () => music.stopBGM());
+
     this.cameras.main.setBackgroundColor('#1a1a2e');
 
     // dekorasi bintang
