@@ -1,0 +1,11 @@
+{
+  "appId": "id.web.mario.petualangan",
+  "appName": "Petualangan Mario",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

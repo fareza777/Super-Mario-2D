@@ -1,0 +1,29 @@
+{
+  "name": "petualangan-mario",
+  "version": "1.0.0",
+  "description": "Side-scrolling 2D platformer ala Mario Bros - 100 level",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "npx serve .",
+    "android:init": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:build:debug": "cd android && ./gradlew assembleDebug",
+    "android:build:release": "cd android && ./gradlew assembleRelease",
+    "android:open": "npx cap open android"
+  },
+  "keywords": [
+    "phaser",
+    "platformer",
+    "mario",
+    "game",
+    "capacitor",
+    "android"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/core": "^5.0.0"
+  }
+}
