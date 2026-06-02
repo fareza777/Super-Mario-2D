@@ -48,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
-    console.log('[GameScene v7] init() data=' + JSON.stringify(data));
+    console.log('[GameScene v8] init() data=' + JSON.stringify(data));
     if (data && data.level) {
       this.currentLevel = data.level;
     }
@@ -71,7 +71,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[GameScene v7] create() level=' + this.currentLevel);
+    console.log('[GameScene v8] create() level=' + this.currentLevel);
     try {
       this.levelData = levels.find(l => l.id === this.currentLevel);
       if (!this.levelData) {
@@ -168,7 +168,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createEnemies(enemiesData) {
-    this.enemies = this.physics.add.group();
+    // v8: runChildUpdate=true supaya Enemy.update() terpanggil tiap frame.
+    // Sebelumnya default false → patrol & wall-flip logic tidak jalan,
+    // enemy cuma pakai velocity awal lalu diam setelah nabrak world bound.
+    this.enemies = this.physics.add.group({ runChildUpdate: true });
     enemiesData.forEach(e => {
       const enemy = new Enemy(this, e.x, e.y, e);
       this.enemies.add(enemy);
@@ -273,10 +276,10 @@ export default class GameScene extends Phaser.Scene {
    * Posisi fix di layar (setScrollFactor(0), depth 500).
    * Hidden saat pause/menu (di-shutdown via shutdown()).
    *
-   * Layout adaptif:
-   *   - HP portrait (W<600): button lebih besar (100x100 D-pad, 130x130 jump)
-   *   - Desktop: button sedang (80x80 D-pad, 100x100 jump)
-   *   - Selalu di pojok bawah layar, margin dari tepi
+   * v8: HANYA tampilkan di touch device. Desktop pakai keyboard saja
+   * supaya tidak menutupi area game. Phaser.device.input.touch bisa
+   * true di beberapa desktop browser (touch laptop), tapi biasanya
+   * user ingin keyboard.
    */
   createTouchControls() {
     this.touch = { left: false, right: false, jumpCounter: 0 };
@@ -285,10 +288,16 @@ export default class GameScene extends Phaser.Scene {
     const isTouch = this.sys.game.device.input.touch;
     const camW = this.cameras.main.width;
     const camH = this.cameras.main.height;
+
+    // v8: hanya render di touch device. Desktop: skip seluruh method.
+    if (!isTouch) {
+      return;
+    }
+
     const isMobile = camW < 600;
 
-    const baseAlpha = isTouch ? 0.5 : 0.25;
-    const pressedAlpha = 0.85;
+    const baseAlpha = 0.45;
+    const pressedAlpha = 0.8;
     const dpadColor = 0x2196f3;
     const dpadPressed = 0x64b5f6;
     const jumpColor = 0x4caf50;
@@ -296,7 +305,7 @@ export default class GameScene extends Phaser.Scene {
 
     const dpadSize = isMobile ? 100 : 80;
     const dpadGap = isMobile ? 12 : 8;
-    const jumpSize = isMobile ? 130 : 100;
+    const jumpSize = isMobile ? 120 : 100;
     const margin = isMobile ? 20 : 16;
     const btnY = camH - margin - dpadSize / 2;
 
@@ -352,36 +361,34 @@ export default class GameScene extends Phaser.Scene {
     const jumpY = camH - margin - jumpSize / 2;
     makeBtn(
       camW - margin - jumpSize / 2, jumpY, jumpSize, jumpSize, 'A',
-      jumpColor, jumpPressed, isMobile ? 72 : 56,
+      jumpColor, jumpPressed, isMobile ? 64 : 56,
       () => { this.touch.jumpCounter += 1; },
       null
     );
 
-    // Tombol pause (mobile only) — pojok kanan atas
-    if (isTouch) {
-      const pauseSize = isMobile ? 56 : 44;
-      const pauseBtn = this.add.rectangle(
-        camW - margin - pauseSize / 2, margin + pauseSize / 2,
-        pauseSize, pauseSize, 0x607d8b, 0.6
-      ).setScrollFactor(0).setDepth(500)
-        .setStrokeStyle(2, 0xffffff, 0.5)
-        .setInteractive({ useHandCursor: true });
-      const pauseTxt = this.add.text(
-        camW - margin - pauseSize / 2, margin + pauseSize / 2,
-        'II', {
-        fontSize: (isMobile ? 26 : 22) + 'px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-        fontStyle: 'bold',
-        stroke: '#000000',
-        strokeThickness: 3
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(501);
-      pauseBtn.on('pointerdown', () => {
-        try { sound.play('click'); } catch (e) {}
-        this.togglePause();
-      });
-      this._touchObjects.push(pauseBtn, pauseTxt);
-    }
+    // Tombol pause — pojok kanan atas (touch only)
+    const pauseSize = isMobile ? 50 : 44;
+    const pauseBtn = this.add.rectangle(
+      camW - margin - pauseSize / 2, margin + pauseSize / 2,
+      pauseSize, pauseSize, 0x607d8b, 0.65
+    ).setScrollFactor(0).setDepth(500)
+      .setStrokeStyle(2, 0xffffff, 0.5)
+      .setInteractive({ useHandCursor: true });
+    const pauseTxt = this.add.text(
+      camW - margin - pauseSize / 2, margin + pauseSize / 2,
+      'II', {
+      fontSize: (isMobile ? 24 : 22) + 'px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(501);
+    pauseBtn.on('pointerdown', () => {
+      try { sound.play('click'); } catch (e) {}
+      this.togglePause();
+    });
+    this._touchObjects.push(pauseBtn, pauseTxt);
   }
 
   hideTouchControls() {

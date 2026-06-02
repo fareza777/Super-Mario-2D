@@ -27,13 +27,13 @@ const config = {
   pixelArt: true,
   // asumsi: FIT mode scale canvas agar pas di mobile/desktop,
   // tetap menjaga rasio 4:3 dengan letterbox jika perlu.
-  // expandParent: true agar canvas selalu fill parent container.
+  // CSS di index.html yang cap max-width/height canvas — Phaser FIT
+  // sendirinya akan scale ke ukuran container.
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
-    height: 600,
-    expandParent: true
+    height: 600
   },
   physics: {
     default: 'arcade',

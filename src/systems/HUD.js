@@ -43,13 +43,6 @@ export default class HUD {
       strokeThickness: 4
     };
 
-    // Panel semi-transparan di belakang HUD kiri-atas (biar teks tetap
-    // terbaca di atas background apapun)
-    this.bgPanel = this.scene.add.rectangle(
-      W * 0.28, padding + 80, W * 0.56, isMobile ? 170 : 160,
-      0x000000, 0.35
-    ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(49);
-
     this.livesText = this.scene.add.text(padding, padding, 'Nyawa: ' + this.lives, style)
       .setScrollFactor(0).setDepth(50);
 
@@ -88,7 +81,7 @@ export default class HUD {
     this.versionText = this.scene.add.text(
       W - 8,
       H - 8,
-      'v7',
+      'v8',
       {
         fontSize: '11px',
         color: '#888888',
