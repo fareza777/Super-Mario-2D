@@ -59,6 +59,7 @@
       color: #555;
       text-align: center;
       pointer-events: none;
+      z-index: 1;
     }
     .controls-hint { display: none; }
     @media (min-width: 900px) and (hover: hover) {
@@ -72,8 +73,30 @@
         color: #555;
         text-align: center;
         pointer-events: none;
+        z-index: 1;
       }
       .footer { bottom: 4px; }
+    }
+    /* Mobile: rotate-to-landscape hint */
+    .rotate-hint {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #1a1a1a;
+      color: #fff;
+      z-index: 9999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+    }
+    .rotate-hint .icon { font-size: 64px; margin-bottom: 16px; }
+    .rotate-hint .title { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
+    .rotate-hint .sub { font-size: 14px; color: #aaa; }
+    @media (max-width: 600px) and (orientation: portrait) {
+      .rotate-hint { display: flex; }
     }
     kbd {
       background: #333;
@@ -87,7 +110,35 @@
 </head>
 <body>
   <div id="game-container"></div>
-  <div class="footer">Petualangan Mario v5 - 100 Level &middot; Phaser 3.60</div>
+  <div class="footer">Petualangan Mario v6 - 100 Level &middot; Phaser 3.60</div>
+  <div class="rotate-hint" id="rotate-hint">
+    <div class="icon">📱↻</div>
+    <div class="title">Putar HP ke Landscape</div>
+    <div class="sub">Game ini lebih nyaman dimainkan dalam mode landscape.</div>
+    <button id="rotate-skip" style="
+      margin-top: 24px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #2196f3;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      cursor: pointer;
+    ">Lanjutkan Portrait</button>
+  </div>
+  <script>
+    (function() {
+      var skip = document.getElementById('rotate-skip');
+      if (skip) {
+        skip.addEventListener('click', function() {
+          var hint = document.getElementById('rotate-hint');
+          if (hint) hint.style.display = 'none';
+        });
+      }
+    })();
+  </script>
   <div class="controls-hint">
     <kbd>&larr;</kbd> <kbd>&rarr;</kbd> / <kbd>A</kbd> <kbd>D</kbd> Gerak &middot;
     <kbd>Space</kbd> Lompat &middot;
@@ -96,6 +147,6 @@
     <kbd>M</kbd> Mute
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=5"></script>
+  <script type="module" src="src/main.js?v=6"></script>
 </body>
 </html>

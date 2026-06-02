@@ -56,7 +56,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[GameScene v4] create() level=' + this.currentLevel);
+    console.log('[GameScene v6] create() level=' + this.currentLevel);
     try {
       this.levelData = levels.find(l => l.id === this.currentLevel);
       if (!this.levelData) {
@@ -102,11 +102,11 @@ export default class GameScene extends Phaser.Scene {
       this.input.keyboard.once('keydown', () => sound.resume());
       this.input.once('pointerdown', () => sound.resume());
 
-      console.log('[GameScene v4] create() done. coins=' +
+      console.log('[GameScene v6] create() done. coins=' +
         (this.levelData.coins || []).length +
         ' platforms=' + (this.levelData.platforms || []).length);
     } catch (err) {
-      console.error('[GameScene v4] create() error:', err);
+      console.error('[GameScene v6] create() error:', err);
       this.showError('Error di level ' + this.currentLevel + ': ' + (err && err.message ? err.message : err));
     }
   }
@@ -257,29 +257,39 @@ export default class GameScene extends Phaser.Scene {
    * Buat D-pad kiri/kanan + tombol A (lompat) di layar.
    * Posisi fix di layar (setScrollFactor(0), depth 500).
    * Hidden saat pause/menu (di-shutdown via shutdown()).
+   *
+   * Layout adaptif:
+   *   - HP portrait (W<600): button lebih besar (100x100 D-pad, 130x130 jump)
+   *   - Desktop: button sedang (80x80 D-pad, 100x100 jump)
+   *   - Selalu di pojok bawah layar, margin dari tepi
    */
   createTouchControls() {
     this.touch = { left: false, right: false, jumpCounter: 0 };
     this._touchObjects = [];
 
-    // deteksi mobile (untuk menampilkan hint)
     const isTouch = this.sys.game.device.input.touch;
+    const camW = this.cameras.main.width;
+    const camH = this.cameras.main.height;
+    const isMobile = camW < 600;
 
-    const baseAlpha = isTouch ? 0.45 : 0.25;
-    const pressedAlpha = 0.75;
+    const baseAlpha = isTouch ? 0.5 : 0.25;
+    const pressedAlpha = 0.85;
     const dpadColor = 0x2196f3;
     const dpadPressed = 0x64b5f6;
     const jumpColor = 0x4caf50;
     const jumpPressed = 0x81c784;
 
-    const camH = this.cameras.main.height;
-    const camW = this.cameras.main.width;
-    const btnY = camH - 60;
+    const dpadSize = isMobile ? 100 : 80;
+    const dpadGap = isMobile ? 12 : 8;
+    const jumpSize = isMobile ? 130 : 100;
+    const margin = isMobile ? 20 : 16;
+    const btnY = camH - margin - dpadSize / 2;
+
     const makeBtn = (x, y, w, h, label, baseC, pressedC, fontSize, onDown, onUp) => {
       const btn = this.add.rectangle(x, y, w, h, baseC, baseAlpha)
         .setScrollFactor(0)
         .setDepth(500)
-        .setStrokeStyle(3, 0xffffff, 0.5)
+        .setStrokeStyle(3, 0xffffff, 0.6)
         .setInteractive({ useHandCursor: true });
       const txt = this.add.text(x, y, label, {
         fontSize: fontSize + 'px',
@@ -293,7 +303,7 @@ export default class GameScene extends Phaser.Scene {
       btn.on('pointerdown', () => {
         if (onDown) onDown();
         btn.setFillStyle(pressedC, pressedAlpha);
-        btn.setScale(0.95);
+        btn.setScale(0.92);
         try { sound.play('click'); } catch (e) { /* ignore */ }
       });
       btn.on('pointerup', () => {
@@ -311,25 +321,52 @@ export default class GameScene extends Phaser.Scene {
 
     // D-pad kiri
     makeBtn(
-      80, btnY, 80, 80, '\u25C0',
-      dpadColor, dpadPressed, 36,
+      margin + dpadSize / 2, btnY, dpadSize, dpadSize, '\u25C0',
+      dpadColor, dpadPressed, isMobile ? 44 : 36,
       () => { this.touch.left = true; },
       () => { this.touch.left = false; }
     );
     // D-pad kanan
     makeBtn(
-      180, btnY, 80, 80, '\u25B6',
-      dpadColor, dpadPressed, 36,
+      margin + dpadSize + dpadGap + dpadSize / 2, btnY, dpadSize, dpadSize, '\u25B6',
+      dpadColor, dpadPressed, isMobile ? 44 : 36,
       () => { this.touch.right = true; },
       () => { this.touch.right = false; }
     );
     // Lompat
+    const jumpY = camH - margin - jumpSize / 2;
     makeBtn(
-      camW - 80, btnY, 100, 100, 'A',
-      jumpColor, jumpPressed, 56,
+      camW - margin - jumpSize / 2, jumpY, jumpSize, jumpSize, 'A',
+      jumpColor, jumpPressed, isMobile ? 72 : 56,
       () => { this.touch.jumpCounter += 1; },
       null
     );
+
+    // Tombol pause (mobile only) — pojok kanan atas
+    if (isTouch) {
+      const pauseSize = isMobile ? 56 : 44;
+      const pauseBtn = this.add.rectangle(
+        camW - margin - pauseSize / 2, margin + pauseSize / 2,
+        pauseSize, pauseSize, 0x607d8b, 0.6
+      ).setScrollFactor(0).setDepth(500)
+        .setStrokeStyle(2, 0xffffff, 0.5)
+        .setInteractive({ useHandCursor: true });
+      const pauseTxt = this.add.text(
+        camW - margin - pauseSize / 2, margin + pauseSize / 2,
+        'II', {
+        fontSize: (isMobile ? 26 : 22) + 'px',
+        color: '#ffffff',
+        fontFamily: 'Arial',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 3
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(501);
+      pauseBtn.on('pointerdown', () => {
+        try { sound.play('click'); } catch (e) {}
+        this.togglePause();
+      });
+      this._touchObjects.push(pauseBtn, pauseTxt);
+    }
   }
 
   hideTouchControls() {
@@ -514,7 +551,7 @@ export default class GameScene extends Phaser.Scene {
   reachGoal() {
     if (this.gameState !== 'playing') return;
     this.gameState = 'won';
-    console.log('[GameScene v4] reachGoal() level=' + this.currentLevel);
+    console.log('[GameScene v6] reachGoal() level=' + this.currentLevel);
     if (this.goalIndicator) {
       this.goalIndicator.destroy();
       this.goalIndicator = null;
@@ -523,7 +560,6 @@ export default class GameScene extends Phaser.Scene {
     LevelManager.markCompleted(this.currentLevel, this.score);
     sound.play('win');
     this.showLevelComplete();
-    // v4: auto-advance DIHAPUS. User harus klik tombol atau tekan SPACE/ENTER.
   }
 
   hitEnemy(player, enemy) {
@@ -575,77 +611,127 @@ export default class GameScene extends Phaser.Scene {
 
   // ---- UI overlays ----
 
+  /**
+   * Helper: posisi overlay center di SCREEN space (bukan world).
+   * Dengan setScrollFactor(0), posisi = posisi layar, jadi pakai
+   * cam.width/2 & cam.height/2 (bukan worldView).
+   * FIX bug: dulu pakai worldView → overlay ke luar layar di level lebar.
+   */
+  getScreenCenter() {
+    return {
+      x: this.cameras.main.width / 2,
+      y: this.cameras.main.height / 2
+    };
+  }
+
   showLevelComplete() {
     this.hideTouchControls();
     const cam = this.cameras.main;
-    const cx = cam.worldView.x + cam.width / 2;
-    const cy = cam.worldView.y + cam.height / 2;
+    const W = cam.width;
+    const H = cam.height;
+    const cx = W / 2;  // SCREEN center, bukan world
+    const cy = H / 2;
+    const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    // Overlay — INTERACTIVE supaya klik di area kosong juga lanjut
-    const overlay = this.add.rectangle(cx, cy, 600, 380, 0x000000, 0.7)
+    // Overlay — INTERACTIVE, klik di area kosong juga advance
+    const overlayW = Math.min(W - 40, 620);
+    const overlayH = Math.min(H - 40, 420);
+    const overlay = this.add.rectangle(cx, cy, overlayW, overlayH, 0x000000, 0.78)
       .setScrollFactor(0).setDepth(99)
       .setInteractive({ useHandCursor: true });
     overlay.on('pointerdown', () => {
-      console.log('[GameScene v4] overlay click -> advance');
+      console.log('[GameScene v6] overlay click -> advance');
       if (this.gameState === 'won') this.advanceToNext();
     });
 
-    this.add.text(cx, cy - 145, 'LEVEL ' + this.currentLevel + ' SELESAI!', {
-      fontSize: '32px',
+    const titleSize = isMobile ? 30 : 36;
+    this.add.text(cx, cy - (isMobile ? 150 : 160), 'LEVEL ' + this.currentLevel + ' SELESAI!', {
+      fontSize: titleSize + 'px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 5
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    this.add.text(cx, cy - 95, 'Skor: ' + this.score + '  |  Waktu: ' + this.formatTime(this.elapsedTime), {
-      fontSize: '20px',
+    this.add.text(cx, cy - (isMobile ? 110 : 115), 'Skor: ' + this.score + '   Waktu: ' + this.formatTime(this.elapsedTime), {
+      fontSize: (isMobile ? 17 : 20) + 'px',
       color: '#ffffff',
-      fontFamily: 'Arial'
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
-
-    // Hint text FLASHING supaya user notice
-    const hint = this.add.text(cx, cy + 130, '> TEKAN SPACE / ENTER / TAP UNTUK LANJUT <', {
-      fontSize: '18px',
-      color: '#ffeb3b',
       fontFamily: 'Arial',
       stroke: '#000',
-      strokeThickness: 4
+      strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
+
+    // ====== Tombol "LANJUT" BESAR (mobile-friendly) ======
+    let label;
+    if (this.currentLevel === 100) {
+      label = 'Lanjut ke Ending';
+    } else if (this.currentLevel % 10 === 0) {
+      label = 'Lanjut (Cutscene)';
+    } else {
+      label = 'Lanjut Level ' + (this.currentLevel + 1);
+    }
+
+    const lanjutBtnY = isMobile ? cy - 50 : cy - 40;
+    const lanjutBtnW = isMobile ? W - 80 : 320;
+    const lanjutBtnH = isMobile ? 70 : 60;
+    const lanjutBtn = this.add.rectangle(cx, lanjutBtnY, lanjutBtnW, lanjutBtnH, 0x4caf50)
+      .setScrollFactor(0).setDepth(101)
+      .setStrokeStyle(4, 0xffffff, 0.7)
+      .setInteractive({ useHandCursor: true });
+    const lanjutTxt = this.add.text(cx, lanjutBtnY, label, {
+      fontSize: (isMobile ? 22 : 22) + 'px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+    lanjutBtn.on('pointerdown', () => {
+      console.log('[GameScene v6] lanjut button click');
+      if (this.gameState === 'won') this.advanceToNext();
+    });
+    lanjutBtn.on('pointerover', () => lanjutBtn.setFillStyle(0x66bb6a));
+    lanjutBtn.on('pointerout', () => lanjutBtn.setFillStyle(0x4caf50));
+
+    // Tombol Ulangi & Menu (lebih kecil, di bawah)
+    const otherBtnY = isMobile ? lanjutBtnY + 60 : lanjutBtnY + 55;
+    this.makeMenuButton(cx, otherBtnY, 'Ulangi Level', () => {
+      this.cancelAutoAdvance();
+      this.scene.start('GameScene', { level: this.currentLevel });
+    }, 100);
+    this.makeMenuButton(cx, otherBtnY + 45, 'Menu Level', () => {
+      this.cancelAutoAdvance();
+      this.scene.start('LevelSelectScene');
+    }, 100);
+
+    // Hint text di bawah
+    const hintY = otherBtnY + 95;
+    const hintText = isMobile
+      ? 'TAP TOMBOL HIJAU UNTUK LANJUT'
+      : 'TEKAN SPACE / ENTER  atau  KLIK TOMBOL';
+    const hint = this.add.text(cx, hintY, hintText, {
+      fontSize: (isMobile ? 14 : 16) + 'px',
+      color: '#ffeb3b',
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
     this.tweens.add({
       targets: hint,
-      alpha: 0.3,
-      duration: 500,
+      alpha: 0.4,
+      duration: 600,
       yoyo: true,
       repeat: -1
     });
 
-    let btnY = cy - 40;
-
-    if (this.currentLevel === 100) {
-      this.makeMenuButton(cx, btnY, 'Lanjut ke Ending', () => this.advanceToNext(), 100);
-      btnY += 50;
-    } else if (this.currentLevel % 10 === 0) {
-      this.makeMenuButton(cx, btnY, 'Lanjut (Cutscene)', () => this.advanceToNext(), 100);
-      btnY += 50;
-    } else {
-      this.makeMenuButton(cx, btnY, 'Lanjut Level ' + (this.currentLevel + 1), () => this.advanceToNext(), 100);
-      btnY += 50;
-    }
-
-    this.makeMenuButton(cx, btnY, 'Ulangi Level', () => {
-      this.cancelAutoAdvance();
-      this.scene.start('GameScene', { level: this.currentLevel });
-    }, 100);
-    btnY += 50;
-    this.makeMenuButton(cx, btnY, 'Menu Level', () => {
-      this.cancelAutoAdvance();
-      this.scene.start('LevelSelectScene');
-    }, 100);
+    // Auto-advance 8 detik (safety net untuk mobile)
+    this.startAutoAdvance(8);
   }
 
   advanceToNext() {
-    console.log('[GameScene v4] advanceToNext() from level=' + this.currentLevel);
+    console.log('[GameScene v6] advanceToNext() from level=' + this.currentLevel);
     this.cancelAutoAdvance();
     if (this.currentLevel === 100) {
       this.scene.start('EndingScene', { score: this.score, time: this.elapsedTime });
@@ -658,7 +744,7 @@ export default class GameScene extends Phaser.Scene {
       });
     } else {
       const nextLevel = this.currentLevel + 1;
-      console.log('[GameScene v4] -> GameScene level=' + nextLevel);
+      console.log('[GameScene v6] -> GameScene level=' + nextLevel);
       this.scene.start('GameScene', { level: nextLevel });
     }
   }
@@ -666,21 +752,26 @@ export default class GameScene extends Phaser.Scene {
   startAutoAdvance(seconds) {
     this.cancelAutoAdvance();
     const cam = this.cameras.main;
-    const cx = cam.worldView.x + cam.width / 2;
-    const cy = cam.worldView.y + cam.height / 2;
+    const cx = cam.width / 2;  // SCREEN center
+    const cy = cam.height / 2;
+    const isMobile = cam.width < 600;
 
-    this._autoAdvanceText = this.add.text(cx, cy + 160, '', {
-      fontSize: '16px',
+    this._autoAdvanceText = this.add.text(cx, cy + (isMobile ? 165 : 175), '', {
+      fontSize: (isMobile ? 14 : 16) + 'px',
       color: '#90ee90',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
     let remaining = seconds;
     const tick = () => {
-      if (this.gameState !== 'won') return;
-      this._autoAdvanceText.setText('Auto lanjut dalam ' + remaining + ' detik...');
+      if (this.gameState !== 'won') {
+        this.cancelAutoAdvance();
+        return;
+      }
+      this._autoAdvanceText.setText('Auto lanjut dalam ' + remaining + ' detik... (klik untuk skip)');
       remaining -= 1;
       if (remaining < 0) {
         this.advanceToNext();
@@ -705,36 +796,43 @@ export default class GameScene extends Phaser.Scene {
   showGameOver() {
     this.hideTouchControls();
     const cam = this.cameras.main;
-    const cx = cam.worldView.x + cam.width / 2;
-    const cy = cam.worldView.y + cam.height / 2;
+    const W = cam.width;
+    const H = cam.height;
+    const cx = W / 2;  // SCREEN center, bukan world
+    const cy = H / 2;
+    const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    this.add.rectangle(cx, cy, 600, 320, 0x000000, 0.75)
+    this.add.rectangle(cx, cy, Math.min(W - 40, 600), Math.min(H - 40, 360), 0x000000, 0.78)
       .setScrollFactor(0).setDepth(99);
 
-    this.add.text(cx, cy - 95, 'GAME OVER', {
-      fontSize: '54px',
+    this.add.text(cx, cy - (isMobile ? 110 : 120), 'GAME OVER', {
+      fontSize: (isMobile ? 42 : 54) + 'px',
       color: '#ff5252',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 6
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    this.add.text(cx, cy - 30, 'Skor: ' + this.score, {
-      fontSize: '22px',
+    this.add.text(cx, cy - (isMobile ? 65 : 75), 'Skor: ' + this.score, {
+      fontSize: (isMobile ? 18 : 22) + 'px',
       color: '#ffffff',
-      fontFamily: 'Arial'
+      fontFamily: 'Arial',
+      stroke: '#000',
+      strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    this.makeMenuButton(cx, cy + 20, 'Lanjut (+1 nyawa)', () => {
+    const btnY0 = isMobile ? cy - 15 : cy - 15;
+    this.makeMenuButton(cx, btnY0, 'Lanjut (+1 nyawa)', () => {
       this.lives = 1;
       this.hud.setLives(this.lives);
       this.scene.start('GameScene', { level: this.currentLevel });
     }, 100);
-    this.makeMenuButton(cx, cy + 70, 'Ulangi dari 0', () => {
+    this.makeMenuButton(cx, btnY0 + 50, 'Ulangi dari 0', () => {
       this.lives = 5;
       this.scene.start('GameScene', { level: this.currentLevel });
     }, 100);
-    this.makeMenuButton(cx, cy + 120, 'Menu Level', () => {
+    this.makeMenuButton(cx, btnY0 + 100, 'Menu Level', () => {
       this.scene.start('LevelSelectScene');
     }, 100);
   }
@@ -766,15 +864,19 @@ export default class GameScene extends Phaser.Scene {
     this.hideTouchControls();
     this.pauseOverlay = [];
     const cam = this.cameras.main;
-    const cx = cam.worldView.x + cam.width / 2;
-    const cy = cam.worldView.y + cam.height / 2;
+    const W = cam.width;
+    const H = cam.height;
+    const cx = W / 2;  // SCREEN center, bukan world
+    const cy = H / 2;
+    const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    const bg = this.add.rectangle(cx, cy, 600, 320, 0x000000, 0.7)
+    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 560), Math.min(H - 40, 340), 0x000000, 0.75)
       .setScrollFactor(0).setDepth(200);
-    const title = this.add.text(cx, cy - 100, 'PAUSE', {
-      fontSize: '52px',
+    const title = this.add.text(cx, cy - (isMobile ? 110 : 120), 'PAUSE', {
+      fontSize: (isMobile ? 40 : 52) + 'px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 5
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201);

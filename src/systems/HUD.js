@@ -4,6 +4,9 @@
  * Heads-Up Display: menampilkan nyawa, skor, level (dengan nama),
  * timer, jumlah koin terkumpul, dan indikator mute.
  * Di-update oleh GameScene.
+ *
+ * Mobile-aware: posisi & ukuran diset relatif terhadap canvas size,
+ * sehingga tetap rapi di layar kecil (HP portrait).
  * ---------------------------------------------------------------
  */
 export default class HUD {
@@ -21,14 +24,31 @@ export default class HUD {
   }
 
   create() {
-    const padding = 16;
+    const cam = this.scene.cameras.main;
+    const W = cam.width;   // 800
+    const H = cam.height;  // 600
+
+    // deteksi layar kecil (HP portrait) — besarkan font
+    const isMobile = W < 600;
+    const baseSize = isMobile ? 22 : 20;
+    const coinSize = isMobile ? 20 : 18;
+    const hintSize = isMobile ? 13 : 11;
+    const padding = isMobile ? 14 : 16;
+
     const style = {
-      fontSize: '20px',
+      fontSize: baseSize + 'px',
       color: '#ffffff',
       fontFamily: 'Arial',
       stroke: '#000000',
       strokeThickness: 4
     };
+
+    // Panel semi-transparan di belakang HUD kiri-atas (biar teks tetap
+    // terbaca di atas background apapun)
+    this.bgPanel = this.scene.add.rectangle(
+      W * 0.28, padding + 80, W * 0.56, isMobile ? 170 : 160,
+      0x000000, 0.35
+    ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(49);
 
     this.livesText = this.scene.add.text(padding, padding, 'Nyawa: ' + this.lives, style)
       .setScrollFactor(0).setDepth(50);
@@ -48,7 +68,7 @@ export default class HUD {
       padding + 120,
       'Koin: ' + this.collectedCoins + ' / ' + this.totalCoins,
       {
-        fontSize: '18px',
+        fontSize: coinSize + 'px',
         color: '#ffd700',
         fontFamily: 'Arial',
         stroke: '#000000',
@@ -64,12 +84,11 @@ export default class HUD {
       strokeThickness: 2
     }).setScrollFactor(0).setDepth(50);
 
-    // VERSION INDICATOR — pojok kanan bawah, supaya user bisa
-    // verifikasi Vercel sudah serve build terbaru
+    // VERSION INDICATOR — pojok kanan bawah
     this.versionText = this.scene.add.text(
-      this.scene.cameras.main.width - 8,
-      this.scene.cameras.main.height - 8,
-      'v5',
+      W - 8,
+      H - 8,
+      'v6',
       {
         fontSize: '11px',
         color: '#888888',
@@ -77,18 +96,21 @@ export default class HUD {
       }
     ).setOrigin(1, 1).setScrollFactor(0).setDepth(50);
 
-    this.hintText = this.scene.add.text(
-      this.scene.cameras.main.width - 16,
-      16,
-      'P: Pause  |  R: Restart  |  M: Mute  |  WASD/Panah: Gerak  |  Spasi: Lompat',
-      {
-        fontSize: '11px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-        stroke: '#000000',
-        strokeThickness: 2
-      }
-    ).setOrigin(1, 0).setScrollFactor(0).setDepth(50);
+    // Hint controls (hanya desktop)
+    if (!isMobile) {
+      this.hintText = this.scene.add.text(
+        W - 16,
+        16,
+        'P: Pause  |  R: Restart  |  M: Mute  |  WASD/Panah: Gerak  |  Spasi: Lompat',
+        {
+          fontSize: hintSize + 'px',
+          color: '#ffffff',
+          fontFamily: 'Arial',
+          stroke: '#000000',
+          strokeThickness: 2
+        }
+      ).setOrigin(1, 0).setScrollFactor(0).setDepth(50);
+    }
   }
 
   setLives(n) {
