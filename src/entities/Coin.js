@@ -1,22 +1,20 @@
 /**
  * src/entities/Coin.js
  * ---------------------------------------------------------------
- * Entity koin. Animasi:
- *   - rotasi 360 derajat (terlihat berputar)
- *   - pulsing scale (berkilat seperti spin 3D dari samping)
+ * Entity koin. Versi DEBUG: TANPA animasi scale pulse, tanpa
+ * rotasi tween — hanya gambar diam. Tujuannya untuk memastikan
+ * koin tetap visible 100% di layar dan tidak "menghilang" karena
+ * scale tween yang mungkin konflik dengan physics.
  *
- * POSISI DIKUNCI LAPIS BERLAPIS untuk mencegah koin jatuh:
+ * Kalau koin masih hilang di versi ini, masalah BUKAN dari animasi.
+ *
+ * Position lock 6 lapis:
  *   1. setImmovable(true)
  *   2. setAllowGravity(false)
- *   3. setGravity(0, 0)            -- eksplisit
- *   4. setVelocity(0, 0)            -- no velocity drift
- *   5. setSize(28, 28) + offset 0   -- body match texture
- *   6. updateFromGameObject()       -- sync body ke sprite
- *
- * collected() dipanggil dari GameScene.collectCoin():
- *   - kill semua tween
- *   - tween mengecil lalu menghilang
- *   - hancurkan objek
+ *   3. setGravity(0, 0)
+ *   4. setVelocity(0, 0)
+ *   5. setSize(28, 28) + offset 0
+ *   6. updateFromGameObject()
  * ---------------------------------------------------------------
  */
 export default class Coin extends Phaser.Physics.Arcade.Sprite {
@@ -27,7 +25,7 @@ export default class Coin extends Phaser.Physics.Arcade.Sprite {
 
     this.value = 10;
 
-    // ---- POSITION LOCK (6 lapis) ----
+    // ---- POSITION LOCK ----
     this.setImmovable(true);
     this.body.setAllowGravity(false);
     this.body.setGravity(0, 0);
@@ -36,24 +34,8 @@ export default class Coin extends Phaser.Physics.Arcade.Sprite {
     this.body.setOffset(0, 0);
     this.body.updateFromGameObject();
 
-    // ---- ANIMASI (TIDAK menyentuh Y) ----
-    // rotasi penuh
-    scene.tweens.add({
-      targets: this,
-      angle: 360,
-      duration: 900,
-      repeat: -1
-    });
-    // pulsing scale (berkilat)
-    scene.tweens.add({
-      targets: this,
-      scaleX: { from: 1, to: 0.4 },
-      scaleY: { from: 1, to: 1.15 },
-      duration: 450,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut'
-    });
+    // ---- TIDAK ADA ANIMASI TWEEN ----
+    // Debug: hapus semua tween untuk verifikasi coin stability
   }
 
   collect() {
@@ -64,7 +46,6 @@ export default class Coin extends Phaser.Physics.Arcade.Sprite {
       targets: this,
       scaleY: 0,
       alpha: 0,
-      angle: this.angle + 180,
       duration: 180,
       onComplete: () => this.destroy()
     });

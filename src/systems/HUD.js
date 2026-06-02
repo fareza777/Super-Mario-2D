@@ -64,6 +64,19 @@ export default class HUD {
       strokeThickness: 2
     }).setScrollFactor(0).setDepth(50);
 
+    // VERSION INDICATOR — pojok kanan bawah, supaya user bisa
+    // verifikasi Vercel sudah serve build terbaru
+    this.versionText = this.scene.add.text(
+      this.scene.cameras.main.width - 8,
+      this.scene.cameras.main.height - 8,
+      'v4',
+      {
+        fontSize: '11px',
+        color: '#888888',
+        fontFamily: 'Arial'
+      }
+    ).setOrigin(1, 1).setScrollFactor(0).setDepth(50);
+
     this.hintText = this.scene.add.text(
       this.scene.cameras.main.width - 16,
       16,

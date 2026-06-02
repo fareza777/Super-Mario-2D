@@ -56,43 +56,59 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.levelData = levels.find(l => l.id === this.currentLevel);
-    if (!this.levelData) {
-      if (levels.length === 0) {
-        this.showEmptyState();
-      } else {
-        this.showError('Level ' + this.currentLevel + ' tidak ditemukan.');
+    console.log('[GameScene v4] create() level=' + this.currentLevel);
+    try {
+      this.levelData = levels.find(l => l.id === this.currentLevel);
+      if (!this.levelData) {
+        if (levels.length === 0) {
+          this.showEmptyState();
+        } else {
+          this.showError('Level ' + this.currentLevel + ' tidak ditemukan.');
+        }
+        return;
       }
-      return;
+
+      // Validasi minimal data level
+      if (!this.levelData.platforms || this.levelData.platforms.length === 0) {
+        this.showError('Level ' + this.currentLevel + ' tidak punya platform.');
+        return;
+      }
+
+      this.startTime = this.time.now;
+      this.elapsedTime = 0;
+
+      this.setupWorld(this.levelData);
+      this.createBackground();
+      this.createPlatforms(this.levelData.platforms);
+      this.createCoins(this.levelData.coins || []);
+      this.createEnemies(this.levelData.enemies || []);
+      this.createPowerUps(this.levelData.powerUps || []);
+      this.createGoal(this.levelData.goal);
+      this.createPlayer(this.levelData.player);
+      this.setupCollisions();
+      this.setupCamera();
+      this.setupInput();
+      this.hud = new HUD(
+        this,
+        this.lives,
+        this.score,
+        this.currentLevel,
+        this.levelData.name,
+        (this.levelData.coins || []).length
+      );
+      this.createTouchControls();
+
+      sound.init();
+      this.input.keyboard.once('keydown', () => sound.resume());
+      this.input.once('pointerdown', () => sound.resume());
+
+      console.log('[GameScene v4] create() done. coins=' +
+        (this.levelData.coins || []).length +
+        ' platforms=' + (this.levelData.platforms || []).length);
+    } catch (err) {
+      console.error('[GameScene v4] create() error:', err);
+      this.showError('Error di level ' + this.currentLevel + ': ' + (err && err.message ? err.message : err));
     }
-
-    this.startTime = this.time.now;
-    this.elapsedTime = 0;
-
-    this.setupWorld(this.levelData);
-    this.createBackground();
-    this.createPlatforms(this.levelData.platforms);
-    this.createCoins(this.levelData.coins || []);
-    this.createEnemies(this.levelData.enemies || []);
-    this.createPowerUps(this.levelData.powerUps || []);
-    this.createGoal(this.levelData.goal);
-    this.createPlayer(this.levelData.player);
-    this.setupCollisions();
-    this.setupCamera();
-    this.setupInput();
-    this.hud = new HUD(
-      this,
-      this.lives,
-      this.score,
-      this.currentLevel,
-      this.levelData.name,
-      (this.levelData.coins || []).length
-    );
-    this.createTouchControls();
-
-    sound.init();
-    this.input.keyboard.once('keydown', () => sound.resume());
-    this.input.once('pointerdown', () => sound.resume());
   }
 
   setupWorld(levelData) {
@@ -471,6 +487,7 @@ export default class GameScene extends Phaser.Scene {
   reachGoal() {
     if (this.gameState !== 'playing') return;
     this.gameState = 'won';
+    console.log('[GameScene v4] reachGoal() level=' + this.currentLevel);
     if (this.goalIndicator) {
       this.goalIndicator.destroy();
       this.goalIndicator = null;
@@ -479,7 +496,7 @@ export default class GameScene extends Phaser.Scene {
     LevelManager.markCompleted(this.currentLevel, this.score);
     sound.play('win');
     this.showLevelComplete();
-    this.startAutoAdvance(3);
+    // v4: auto-advance DIHAPUS. User harus klik tombol atau tekan SPACE/ENTER.
   }
 
   hitEnemy(player, enemy) {
@@ -537,8 +554,14 @@ export default class GameScene extends Phaser.Scene {
     const cx = cam.worldView.x + cam.width / 2;
     const cy = cam.worldView.y + cam.height / 2;
 
-    this.add.rectangle(cx, cy, 600, 380, 0x000000, 0.7)
-      .setScrollFactor(0).setDepth(99);
+    // Overlay — INTERACTIVE supaya klik di area kosong juga lanjut
+    const overlay = this.add.rectangle(cx, cy, 600, 380, 0x000000, 0.7)
+      .setScrollFactor(0).setDepth(99)
+      .setInteractive({ useHandCursor: true });
+    overlay.on('pointerdown', () => {
+      console.log('[GameScene v4] overlay click -> advance');
+      if (this.gameState === 'won') this.advanceToNext();
+    });
 
     this.add.text(cx, cy - 145, 'LEVEL ' + this.currentLevel + ' SELESAI!', {
       fontSize: '32px',
@@ -554,11 +577,21 @@ export default class GameScene extends Phaser.Scene {
       fontFamily: 'Arial'
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    this.add.text(cx, cy + 130, 'Tekan SPACE / ENTER atau tap untuk lanjut', {
-      fontSize: '14px',
+    // Hint text FLASHING supaya user notice
+    const hint = this.add.text(cx, cy + 130, '> TEKAN SPACE / ENTER / TAP UNTUK LANJUT <', {
+      fontSize: '18px',
       color: '#ffeb3b',
-      fontFamily: 'Arial'
+      fontFamily: 'Arial',
+      stroke: '#000',
+      strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
+    this.tweens.add({
+      targets: hint,
+      alpha: 0.3,
+      duration: 500,
+      yoyo: true,
+      repeat: -1
+    });
 
     let btnY = cy - 40;
 
@@ -585,6 +618,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   advanceToNext() {
+    console.log('[GameScene v4] advanceToNext() from level=' + this.currentLevel);
     this.cancelAutoAdvance();
     if (this.currentLevel === 100) {
       this.scene.start('EndingScene', { score: this.score, time: this.elapsedTime });
@@ -596,7 +630,9 @@ export default class GameScene extends Phaser.Scene {
         nextLevel: this.currentLevel + 1
       });
     } else {
-      this.scene.start('GameScene', { level: this.currentLevel + 1 });
+      const nextLevel = this.currentLevel + 1;
+      console.log('[GameScene v4] -> GameScene level=' + nextLevel);
+      this.scene.start('GameScene', { level: nextLevel });
     }
   }
 
