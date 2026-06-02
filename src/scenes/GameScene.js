@@ -48,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
-    console.log('[GameScene v8] init() data=' + JSON.stringify(data));
+    console.log('[GameScene v10] init() data=' + JSON.stringify(data));
     if (data && data.level) {
       this.currentLevel = data.level;
     }
@@ -71,7 +71,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[GameScene v8] create() level=' + this.currentLevel);
+    console.log('[GameScene v10] create() level=' + this.currentLevel);
     try {
       this.levelData = levels.find(l => l.id === this.currentLevel);
       if (!this.levelData) {
@@ -116,6 +116,9 @@ export default class GameScene extends Phaser.Scene {
       sound.init();
       this.input.keyboard.once('keydown', () => sound.resume());
       this.input.once('pointerdown', () => sound.resume());
+
+      // v10: dengarkan event pause dari HTML button
+      this.game.events.on('mobile-pause', this.togglePause, this);
 
       console.log('[GameScene v7] create() done. coins=' +
         (this.levelData.coins || []).length +
@@ -285,110 +288,8 @@ export default class GameScene extends Phaser.Scene {
     this.touch = { left: false, right: false, jumpCounter: 0 };
     this._touchObjects = [];
 
-    const isTouch = this.sys.game.device.input.touch;
-    const camW = this.cameras.main.width;
-    const camH = this.cameras.main.height;
-
-    // v8: hanya render di touch device. Desktop: skip seluruh method.
-    if (!isTouch) {
-      return;
-    }
-
-    const isMobile = camW < 600;
-
-    const baseAlpha = 0.45;
-    const pressedAlpha = 0.8;
-    const dpadColor = 0x2196f3;
-    const dpadPressed = 0x64b5f6;
-    const jumpColor = 0x4caf50;
-    const jumpPressed = 0x81c784;
-
-    const dpadSize = isMobile ? 100 : 80;
-    const dpadGap = isMobile ? 12 : 8;
-    const jumpSize = isMobile ? 120 : 100;
-    const margin = isMobile ? 20 : 16;
-    const btnY = camH - margin - dpadSize / 2;
-
-    const makeBtn = (x, y, w, h, label, baseC, pressedC, fontSize, onDown, onUp) => {
-      const btn = this.add.rectangle(x, y, w, h, baseC, baseAlpha)
-        .setScrollFactor(0)
-        .setDepth(500)
-        .setStrokeStyle(3, 0xffffff, 0.6)
-        .setInteractive({ useHandCursor: true });
-      const txt = this.add.text(x, y, label, {
-        fontSize: fontSize + 'px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-        fontStyle: 'bold',
-        stroke: '#000000',
-        strokeThickness: 4
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(501);
-
-      btn.on('pointerdown', () => {
-        if (onDown) onDown();
-        btn.setFillStyle(pressedC, pressedAlpha);
-        btn.setScale(0.92);
-        try { sound.play('click'); } catch (e) { /* ignore */ }
-      });
-      btn.on('pointerup', () => {
-        if (onUp) onUp();
-        btn.setFillStyle(baseC, baseAlpha);
-        btn.setScale(1);
-      });
-      btn.on('pointerout', () => {
-        if (onUp) onUp();
-        btn.setFillStyle(baseC, baseAlpha);
-        btn.setScale(1);
-      });
-      this._touchObjects.push(btn, txt);
-    };
-
-    // D-pad kiri
-    makeBtn(
-      margin + dpadSize / 2, btnY, dpadSize, dpadSize, '\u25C0',
-      dpadColor, dpadPressed, isMobile ? 44 : 36,
-      () => { this.touch.left = true; },
-      () => { this.touch.left = false; }
-    );
-    // D-pad kanan
-    makeBtn(
-      margin + dpadSize + dpadGap + dpadSize / 2, btnY, dpadSize, dpadSize, '\u25B6',
-      dpadColor, dpadPressed, isMobile ? 44 : 36,
-      () => { this.touch.right = true; },
-      () => { this.touch.right = false; }
-    );
-    // Lompat
-    const jumpY = camH - margin - jumpSize / 2;
-    makeBtn(
-      camW - margin - jumpSize / 2, jumpY, jumpSize, jumpSize, 'A',
-      jumpColor, jumpPressed, isMobile ? 64 : 56,
-      () => { this.touch.jumpCounter += 1; },
-      null
-    );
-
-    // Tombol pause — pojok kanan atas (touch only)
-    const pauseSize = isMobile ? 50 : 44;
-    const pauseBtn = this.add.rectangle(
-      camW - margin - pauseSize / 2, margin + pauseSize / 2,
-      pauseSize, pauseSize, 0x607d8b, 0.65
-    ).setScrollFactor(0).setDepth(500)
-      .setStrokeStyle(2, 0xffffff, 0.5)
-      .setInteractive({ useHandCursor: true });
-    const pauseTxt = this.add.text(
-      camW - margin - pauseSize / 2, margin + pauseSize / 2,
-      'II', {
-      fontSize: (isMobile ? 24 : 22) + 'px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(501);
-    pauseBtn.on('pointerdown', () => {
-      try { sound.play('click'); } catch (e) {}
-      this.togglePause();
-    });
-    this._touchObjects.push(pauseBtn, pauseTxt);
+    // v10: kontrol dihandle oleh HTML button (lihat index.html),
+    // bukan Phaser overlay. Method ini jadi no-op.
   }
 
   hideTouchControls() {
@@ -415,15 +316,23 @@ export default class GameScene extends Phaser.Scene {
       this.elapsedTime = this.time.now - this.startTime;
       this.hud.setTime(this.elapsedTime);
 
-      const left = this.keyLeft.isDown || this.keyA.isDown || (this.touch && this.touch.left);
-      const right = this.keyRight.isDown || this.keyD.isDown || (this.touch && this.touch.right);
+      // v10: gabungkan keyboard + Phaser touch + HTML touch input
+      const inHTML = window.__input || {};
+      const left = this.keyLeft.isDown || this.keyA.isDown ||
+        (this.touch && this.touch.left) || inHTML.left;
+      const right = this.keyRight.isDown || this.keyD.isDown ||
+        (this.touch && this.touch.right) || inHTML.right;
       const jump =
         Phaser.Input.Keyboard.JustDown(this.keyUp) ||
         Phaser.Input.Keyboard.JustDown(this.keyW) ||
         Phaser.Input.Keyboard.JustDown(this.keySpace) ||
-        (this.touch && this.touch.jumpCounter > 0);
+        (this.touch && this.touch.jumpCounter > 0) ||
+        inHTML.jumpPressed;
       if (this.touch && this.touch.jumpCounter > 0) {
         this.touch.jumpCounter -= 1;
+      }
+      if (inHTML.jumpPressed) {
+        inHTML.jumpPressed = false;
       }
       this.player.handleInput(left, right, jump, delta);
 

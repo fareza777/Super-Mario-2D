@@ -9,17 +9,16 @@
   <meta name="theme-color" content="#1a1a1a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Petualangan Mario - 100 Level</title>
   <style>
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       height: 100%;
       width: 100%;
-      font-family: 'Arial', sans-serif;
+      background: #0a0a1a;
+      font-family: Arial, sans-serif;
       overscroll-behavior: none;
       touch-action: none;
       user-select: none;
@@ -29,130 +28,178 @@
     }
     body {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
       flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
     }
+
+    /* ========== Zona game (atas) ========== */
     #game-container {
-      width: 100%;
-      height: 100%;
-      max-width: min(100vw, calc(100vh * 4 / 3));
-      max-height: min(100vh, calc(100vw * 3 / 4));
+      flex: 1 1 auto;
+      min-height: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      position: relative;
+      overflow: hidden;
     }
     canvas {
       display: block;
-      touch-action: none;
       max-width: 100%;
       max-height: 100%;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-      border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
     }
-    .footer {
-      position: fixed;
-      bottom: 4px;
-      left: 0;
-      right: 0;
-      font-size: 11px;
-      color: #555;
-      text-align: center;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .controls-hint { display: none; }
-    @media (min-width: 900px) and (hover: hover) {
-      .controls-hint {
-        display: block;
-        position: fixed;
-        bottom: 22px;
-        left: 0;
-        right: 0;
-        font-size: 11px;
-        color: #555;
-        text-align: center;
-        pointer-events: none;
-        z-index: 1;
-      }
-      .footer { bottom: 4px; }
-    }
-    /* Mobile: rotate-to-landscape hint */
-    .rotate-hint {
+
+    /* ========== Zona kontrol (bawah) - HTML asli ========== */
+    #touch-controls {
+      flex: 0 0 120px;
       display: none;
-      position: fixed;
-      inset: 0;
-      background: #1a1a1a;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 18px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #2a2a3a 100%);
+      border-top: 2px solid rgba(76, 175, 80, 0.35);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .ctrl-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .ctrl-btn {
+      border: 3px solid rgba(255, 255, 255, 0.75);
+      border-radius: 50%;
       color: #fff;
-      z-index: 9999;
-      flex-direction: column;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      cursor: pointer;
+      display: flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
-      padding: 24px;
-      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.05s ease, background 0.05s ease;
     }
-    .rotate-hint .icon { font-size: 64px; margin-bottom: 16px; }
-    .rotate-hint .title { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
-    .rotate-hint .sub { font-size: 14px; color: #aaa; }
-    @media (max-width: 600px) and (orientation: portrait) {
-      .rotate-hint { display: flex; }
+    .ctrl-btn.dpad {
+      width: 64px;
+      height: 64px;
+      font-size: 26px;
+      background: #2196f3;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
-    kbd {
-      background: #333;
-      border: 1px solid #555;
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-family: monospace;
-      color: #ccc;
+    .ctrl-btn.dpad:active, .ctrl-btn.dpad.pressed {
+      background: #64b5f6;
+      transform: scale(0.9);
     }
+    .ctrl-btn.action {
+      width: 80px;
+      height: 80px;
+      font-size: 36px;
+      background: #4caf50;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    .ctrl-btn.action:active, .ctrl-btn.action.pressed {
+      background: #81c784;
+      transform: scale(0.9);
+    }
+    .ctrl-btn.pause {
+      width: 50px;
+      height: 50px;
+      font-size: 18px;
+      background: #607d8b;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    .ctrl-btn.pause:active, .ctrl-btn.pause.pressed {
+      background: #78909c;
+      transform: scale(0.9);
+    }
+
+    /* ========== Tampilkan kontrol hanya di touch device ========== */
+    body.touch-device #touch-controls {
+      display: flex;
+    }
+    body.touch-device .footer,
+    body.touch-device .controls-hint {
+      display: none !important;
+    }
+    .footer {
+      display: none;
+    }
+    .controls-hint { display: none; }
   </style>
 </head>
 <body>
   <div id="game-container"></div>
-  <div class="footer">Petualangan Mario v9 - 100 Level &middot; Phaser 3.60</div>
-  <div class="rotate-hint" id="rotate-hint">
-    <div class="icon">📱↻</div>
-    <div class="title">Putar HP ke Landscape</div>
-    <div class="sub">Game ini lebih nyaman dimainkan dalam mode landscape.</div>
-    <button id="rotate-skip" style="
-      margin-top: 24px;
-      padding: 12px 24px;
-      font-size: 16px;
-      background: #2196f3;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      cursor: pointer;
-    ">Lanjutkan Portrait</button>
+  <div id="touch-controls">
+    <div class="ctrl-group left">
+      <button id="btn-left" class="ctrl-btn dpad" type="button">&#9664;</button>
+      <button id="btn-right" class="ctrl-btn dpad" type="button">&#9654;</button>
+    </div>
+    <div class="ctrl-group right">
+      <button id="btn-pause" class="ctrl-btn pause" type="button">II</button>
+      <button id="btn-action" class="ctrl-btn action" type="button">A</button>
+    </div>
   </div>
+
   <script>
+    // ========== Deteksi touch device ==========
     (function() {
-      var skip = document.getElementById('rotate-skip');
-      if (skip) {
-        skip.addEventListener('click', function() {
-          var hint = document.getElementById('rotate-hint');
-          if (hint) hint.style.display = 'none';
-        });
-      }
+      var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      if (isTouch) document.body.classList.add('touch-device');
     })();
+
+    // ========== Global input flags (dibaca oleh Phaser GameScene) ==========
+    window.__input = { left: false, right: false, jump: false, jumpPressed: false };
+
+    // ========== Helper: bind HTML button ke flag ==========
+    function bindBtn(id, onPress, onRelease) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      var press = function(e) {
+        e.preventDefault();
+        if (onPress) onPress();
+      };
+      var release = function(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (onRelease) onRelease();
+      };
+      btn.addEventListener('pointerdown', press);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointercancel', release);
+      btn.addEventListener('pointerleave', release);
+      btn.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    }
+
+    bindBtn('btn-left',
+      function() { window.__input.left = true; },
+      function() { window.__input.left = false; }
+    );
+    bindBtn('btn-right',
+      function() { window.__input.right = true; },
+      function() { window.__input.right = false; }
+    );
+    bindBtn('btn-action',
+      function() {
+        window.__input.jump = true;
+        window.__input.jumpPressed = true;  // one-shot untuk trigger lompat
+      },
+      function() { window.__input.jump = false; }
+    );
+    bindBtn('btn-pause',
+      function() {
+        var game = window.__game;
+        if (game && game.events) game.events.emit('mobile-pause');
+      },
+      null
+    );
   </script>
-  <div class="controls-hint">
-    <kbd>&larr;</kbd> <kbd>&rarr;</kbd> / <kbd>A</kbd> <kbd>D</kbd> Gerak &middot;
-    <kbd>Space</kbd> Lompat &middot;
-    <kbd>P</kbd> Pause &middot;
-    <kbd>R</kbd> Restart &middot;
-    <kbd>M</kbd> Mute
-  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=9"></script>
+  <script type="module" src="src/main.js?v=10"></script>
 </body>
 </html>
