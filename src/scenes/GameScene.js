@@ -142,11 +142,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createCoins(coinsData) {
-    this.coins = this.physics.add.group();
-    coinsData.forEach(c => {
+    this.coins = [];
+    console.log('[v5] Creating ' + coinsData.length + ' coins');
+    coinsData.forEach((c, i) => {
       const coin = new Coin(this, c.x, c.y);
-      this.coins.add(coin);
+      console.log('[v5] Coin ' + i + ' at (' + c.x + ', ' + c.y + ')');
+      this.coins.push(coin);
     });
+    this._lastCoinCount = coinsData.length;
   }
 
   createEnemies(enemiesData) {
@@ -187,7 +190,7 @@ export default class GameScene extends Phaser.Scene {
       }
     });
     this.physics.add.collider(this.enemies, this.platforms);
-    this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
+    // v5: coin overlap di-handle MANUAL di update() — lihat coinOverlap()
     this.physics.add.overlap(this.player, this.goal, this.reachGoal, null, this);
     this.physics.add.collider(this.player, this.enemies, this.hitEnemy, null, this);
     this.physics.add.overlap(this.player, this.powerUps, this.collectPowerUp, null, this);
@@ -365,6 +368,9 @@ export default class GameScene extends Phaser.Scene {
       }
       this.player.handleInput(left, right, jump, delta);
 
+      // v5: manual coin overlap (coin tidak punya physics body)
+      this.coinOverlap();
+
       if (this.levelData && this.player.x >= this.levelData.goal.x) {
         this.reachGoal();
       }
@@ -405,13 +411,34 @@ export default class GameScene extends Phaser.Scene {
   // ---- collectibles ----
 
   collectCoin(player, coin) {
-    if (!coin.active) return;
+    if (!coin || coin._collected) return;
+    console.log('[v5] collectCoin at (' + coin.x + ', ' + coin.y + ')');
     coin.collect();
     this.score += coin.value;
     this.hud.setScore(this.score);
     this.hud.addCoin();
     this.spawnCoinBurst(coin.x, coin.y);
     sound.play('coin');
+  }
+
+  /**
+   * v5: cek overlap coin manual (distance squared check).
+   * Threshold 28^2 = 784. Coin tidak punya physics body,
+   * jadi tidak mungkin "jatuh" / "hilang" karena physics.
+   */
+  coinOverlap() {
+    if (!this.coins || !this.player) return;
+    const px = this.player.x;
+    const py = this.player.y;
+    for (let i = 0; i < this.coins.length; i++) {
+      const coin = this.coins[i];
+      if (!coin || coin._collected || !coin.active) continue;
+      const dx = coin.x - px;
+      const dy = coin.y - py;
+      if (dx * dx + dy * dy < 784) {  // dist < 28
+        this.collectCoin(this.player, coin);
+      }
+    }
   }
 
   collectPowerUp(player, powerUp) {

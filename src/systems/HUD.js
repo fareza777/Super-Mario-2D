@@ -69,7 +69,7 @@ export default class HUD {
     this.versionText = this.scene.add.text(
       this.scene.cameras.main.width - 8,
       this.scene.cameras.main.height - 8,
-      'v4',
+      'v5',
       {
         fontSize: '11px',
         color: '#888888',
