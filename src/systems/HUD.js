@@ -1,12 +1,9 @@
 /**
  * src/systems/HUD.js
  * ---------------------------------------------------------------
- * Heads-Up Display: menampilkan nyawa, skor, level (dengan nama),
- * timer, jumlah koin terkumpul, dan indikator mute.
- * Di-update oleh GameScene.
- *
- * Mobile-aware: posisi & ukuran diset relatif terhadap canvas size,
- * sehingga tetap rapi di layar kecil (HP portrait).
+ * Heads-Up Display: menampilkan nyawa, skor, level, timer, koin.
+ * v11: dipusatkan (center) supaya tetap terlihat saat canvas
+ *      extend horizontal di mobile (HEIGHT_CONTROLS_WIDTH mode).
  * ---------------------------------------------------------------
  */
 export default class HUD {
@@ -27,13 +24,12 @@ export default class HUD {
     const cam = this.scene.cameras.main;
     const W = cam.width;   // 800
     const H = cam.height;  // 600
-
-    // deteksi layar kecil (HP portrait) — besarkan font
+    const cx = W / 2;
     const isMobile = W < 600;
     const baseSize = isMobile ? 22 : 20;
     const coinSize = isMobile ? 20 : 18;
     const hintSize = isMobile ? 13 : 11;
-    const padding = isMobile ? 14 : 16;
+    const padding = isMobile ? 12 : 14;
 
     const style = {
       fontSize: baseSize + 'px',
@@ -43,57 +39,55 @@ export default class HUD {
       strokeThickness: 4
     };
 
-    this.livesText = this.scene.add.text(padding, padding, 'Nyawa: ' + this.lives, style)
-      .setScrollFactor(0).setDepth(50);
+    // Background panel semi-transparan di tengah-atas (supaya teks
+    // tetap terbaca di atas background apapun, termasuk game world)
+    this.bgPanel = this.scene.add.rectangle(
+      cx, padding - 4, Math.min(W - 20, 360), isMobile ? 152 : 142,
+      0x000000, 0.45
+    ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(49);
 
-    this.scoreText = this.scene.add.text(padding, padding + 30, 'Skor: ' + this.score, style)
-      .setScrollFactor(0).setDepth(50);
+    // v11: semua text di-center horizontal, disusun vertikal dari atas
+    this.livesText = this.scene.add.text(cx, padding, 'Nyawa: ' + this.lives, style)
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
+
+    this.scoreText = this.scene.add.text(cx, padding + 28, 'Skor: ' + this.score, style)
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
     const levelLabel = 'Level: ' + this.level + (this.levelName ? ' - ' + this.levelName : '');
-    this.levelText = this.scene.add.text(padding, padding + 60, levelLabel, style)
-      .setScrollFactor(0).setDepth(50);
+    this.levelText = this.scene.add.text(cx, padding + 56, levelLabel, style)
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
-    this.timeText = this.scene.add.text(padding, padding + 90, 'Waktu: 00:00', style)
-      .setScrollFactor(0).setDepth(50);
+    this.timeText = this.scene.add.text(cx, padding + 84, 'Waktu: 00:00', style)
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
-    this.coinText = this.scene.add.text(
-      padding,
-      padding + 120,
-      'Koin: ' + this.collectedCoins + ' / ' + this.totalCoins,
-      {
-        fontSize: coinSize + 'px',
-        color: '#ffd700',
-        fontFamily: 'Arial',
-        stroke: '#000000',
-        strokeThickness: 4
-      }
-    ).setScrollFactor(0).setDepth(50);
+    this.coinText = this.scene.add.text(cx, padding + 112, 'Koin: ' + this.collectedCoins + ' / ' + this.totalCoins, {
+      fontSize: coinSize + 'px',
+      color: '#ffd700',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 4
+    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
-    this.muteText = this.scene.add.text(padding, padding + 150, '', {
+    this.muteText = this.scene.add.text(cx, padding + 140, '', {
       fontSize: '14px',
       color: '#ff8080',
       fontFamily: 'Arial',
       stroke: '#000',
       strokeThickness: 2
-    }).setScrollFactor(0).setDepth(50);
+    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
-    // VERSION INDICATOR — pojok kanan bawah
+    // VERSION di tengah-bawah
     this.versionText = this.scene.add.text(
-      W - 8,
-      H - 8,
-      'v10',
-      {
-        fontSize: '11px',
-        color: '#888888',
-        fontFamily: 'Arial'
-      }
-    ).setOrigin(1, 1).setScrollFactor(0).setDepth(50);
+      cx, H - 8, 'v11', {
+      fontSize: '11px',
+      color: '#aaaaaa',
+      fontFamily: 'Arial'
+    }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(50);
 
-    // Hint controls (hanya desktop)
+    // Desktop hint di pojok kanan-atas (desktop only, canvas muat)
     if (!isMobile) {
       this.hintText = this.scene.add.text(
-        W - 16,
-        16,
+        W - 16, 16,
         'P: Pause  |  R: Restart  |  M: Mute  |  WASD/Panah: Gerak  |  Spasi: Lompat',
         {
           fontSize: hintSize + 'px',

@@ -5,6 +5,8 @@
  * (sebelum masuk level berikutnya). Data cerita dari story.js.
  * ---------------------------------------------------------------
  */
+import { music } from '../systems/MusicManager.js';
+
 export default class CutScene extends Phaser.Scene {
   constructor() {
     super('CutScene');
@@ -17,6 +19,11 @@ export default class CutScene extends Phaser.Scene {
   }
 
   create() {
+    // v11: BGM calm untuk cutscene
+    music.playBGM('calm');
+    music.stopWind();
+    this.events.once('shutdown', () => music.stopBGM());
+
     this.cameras.main.setBackgroundColor('#0d1b2a');
 
     // dekorasi bintang

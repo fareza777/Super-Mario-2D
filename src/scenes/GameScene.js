@@ -25,6 +25,7 @@ import PowerUp from '../entities/PowerUp.js';
 import HUD from '../systems/HUD.js';
 import LevelManager from '../systems/LevelManager.js';
 import { sound } from '../systems/SoundManager.js';
+import { music } from '../systems/MusicManager.js';
 import { levels } from '../data/levels.js';
 import { getCutsceneStory } from '../data/story.js';
 
@@ -119,6 +120,16 @@ export default class GameScene extends Phaser.Scene {
 
       // v10: dengarkan event pause dari HTML button
       this.game.events.on('mobile-pause', this.togglePause, this);
+
+      // v11: BGM berdasarkan range level + ambient wind
+      this._playBGMForLevel();
+      music.playWind();
+
+      // stop musik saat scene shutdown
+      this.events.once('shutdown', () => {
+        music.stopAll();
+        this.game.events.off('mobile-pause', this.togglePause, this);
+      });
 
       console.log('[GameScene v7] create() done. coins=' +
         (this.levelData.coins || []).length +
@@ -859,6 +870,16 @@ export default class GameScene extends Phaser.Scene {
   restartLevel() {
     this.cancelAutoAdvance();
     this.scene.start('GameScene', { level: this.currentLevel });
+  }
+
+  // ===== v11: BGM selection per level range =====
+  _playBGMForLevel() {
+    let track;
+    if (this.currentLevel <= 20) track = 'adventure';
+    else if (this.currentLevel <= 50) track = 'challenge';
+    else if (this.currentLevel <= 99) track = 'epic';
+    else track = 'ending';
+    music.playBGM(track);
   }
 
   showEmptyState() {

@@ -44,10 +44,19 @@
     }
     canvas {
       display: block;
-      max-width: 100%;
-      max-height: 100%;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
       border-radius: 2px;
+      /* v11: biarkan Phaser atur ukuran canvas via scale mode,
+         jangan paksa max-width/height di CSS supaya scale penuh */
+    }
+    /* Mobile: canvas pakai tinggi container, extend horizontal,
+       overflow hidden supaya sisi kiri/kanan terclip tapi tengah
+       (diikuti player) selalu kelihatan. */
+    body.touch-device #game-container canvas {
+      max-width: none;
+      max-height: 100%;
+      width: auto;
+      height: 100%;
     }
 
     /* ========== Zona kontrol (bawah) - HTML asli ========== */
@@ -200,6 +209,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=10"></script>
+  <script type="module" src="src/main.js?v=11"></script>
 </body>
 </html>

@@ -6,6 +6,9 @@
  * + noise. Karena kebijakan autoplay browser, AudioContext harus
  * di-resume() pada interaksi pengguna pertama (keydown/click).
  *
+ * v11: integrasi dengan MusicManager — toggleMute juga mute BGM
+ *      dan ambient.
+ *
  * Tipe suara yang tersedia:
  *   - jump     : sweep naik pendek (saat lompat)
  *   - coin     : dua nada cepat (saat ambil koin)
@@ -18,6 +21,8 @@
  *   - click    : klik tombol UI
  * ---------------------------------------------------------------
  */
+import { music } from './MusicManager.js';
+
 class SoundManager {
   constructor() {
     this.ctx = null;
@@ -54,6 +59,8 @@ class SoundManager {
     if (this.masterGain) {
       this.masterGain.gain.value = this.muted ? 0 : 0.25;
     }
+    // v11: sinkronkan dengan MusicManager
+    if (music) music.setMuted(this.muted);
     return this.muted;
   }
 

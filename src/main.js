@@ -25,16 +25,20 @@ const config = {
   parent: 'game-container',
   backgroundColor: '#87CEEB',
   pixelArt: true,
-  // asumsi: FIT mode scale canvas agar pas di mobile/desktop,
-  // tetap menjaga rasio 4:3 dengan letterbox jika perlu.
-  // CSS di index.html yang cap max-width/height canvas — Phaser FIT
-  // sendirinya akan scale ke ukuran container.
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 800,
-    height: 600
-  },
+  // v11: deteksi mobile → HEIGHT_CONTROLS_WIDTH (canvas isi tinggi,
+  // extend horizontal, kamera follow player → selalu kelihatan).
+  // Desktop → FIT (4:3 letterbox).
+  scale: (function() {
+    var isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    return {
+      mode: isMobile ? Phaser.Scale.HEIGHT_CONTROLS_WIDTH : Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: 800,
+      height: 600,
+      parent: 'game-container',
+      expandParent: false
+    };
+  })(),
   physics: {
     default: 'arcade',
     arcade: {

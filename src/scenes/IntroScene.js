@@ -6,6 +6,7 @@
  * ---------------------------------------------------------------
  */
 import { story } from '../data/story.js';
+import { music } from '../systems/MusicManager.js';
 
 export default class IntroScene extends Phaser.Scene {
   constructor() {
@@ -13,6 +14,11 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   create() {
+    // v11: BGM calm untuk intro
+    music.playBGM('calm');
+    music.stopWind();
+    this.events.once('shutdown', () => music.stopBGM());
+
     this.createBackground();
     this.createTitle();
     this.createSubtitle();
