@@ -1,9 +1,9 @@
 /**
  * src/systems/HUD.js
  * ---------------------------------------------------------------
- * Heads-Up Display: menampilkan nyawa, skor, level, timer, koin.
- * v12: dipusatkan (center) untuk canvas portrait 600x800.
- *      HUD disusun vertikal di atas, versi di bawah.
+ * Heads-Up Display: nyawa, skor, level, timer, koin.
+ * v13: panel rounded dengan border hijau, layout 2-kolom,
+ *      icon Unicode berwarna (♥ ★ ⏱ ◉), font tebal dengan stroke.
  * ---------------------------------------------------------------
  */
 export default class HUD {
@@ -22,92 +22,116 @@ export default class HUD {
 
   create() {
     const cam = this.scene.cameras.main;
-    const W = cam.width;   // v12: 600 (portrait)
-    const H = cam.height;  // v12: 800
+    const W = cam.width;   // 600
+    const H = cam.height;  // 800
     const cx = W / 2;
     const isMobile = W < 700;
-    const baseSize = isMobile ? 18 : 20;
-    const coinSize = isMobile ? 16 : 18;
-    const hintSize = isMobile ? 11 : 11;
-    const padding = isMobile ? 10 : 14;
 
-    const style = {
-      fontSize: baseSize + 'px',
-      color: '#ffffff',
+    const panelW = Math.min(W - 16, 360);
+    const panelH = isMobile ? 110 : 100;
+    const panelX = cx - panelW / 2;
+    const panelY = 6;
+
+    // ========== Panel rounded dengan border hijau ==========
+    this.panel = this.scene.add.graphics();
+    this.panel.fillStyle(0x0d1b2a, 0.72);
+    this.panel.fillRoundedRect(panelX, panelY, panelW, panelH, 12);
+    this.panel.lineStyle(1.5, 0x4caf50, 0.55);
+    this.panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 12);
+    this.panel.setScrollFactor(0).setDepth(49);
+
+    // garis divider vertikal di tengah panel
+    this.panel.lineStyle(1, 0xffffff, 0.12);
+    this.panel.lineBetween(cx, panelY + 10, cx, panelY + panelH - 10);
+
+    // ========== Style helper ==========
+    const lbl = {
+      fontSize: '10px',
+      color: '#90a4ae',
       fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 4
+      fontStyle: 'bold'
     };
-
-    // Background panel semi-transparan di tengah-atas (supaya teks
-    // tetap terbaca di atas background apapun, termasuk game world)
-    this.bgPanel = this.scene.add.rectangle(
-      cx, padding - 4, Math.min(W - 20, 360), isMobile ? 152 : 142,
-      0x000000, 0.45
-    ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(49);
-
-    // v12: semua text di-center horizontal, disusun vertikal dari atas
-    this.livesText = this.scene.add.text(cx, padding, 'Nyawa: ' + this.lives, style)
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
-
-    this.scoreText = this.scene.add.text(cx, padding + 28, 'Skor: ' + this.score, style)
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
-
-    const levelLabel = 'Level: ' + this.level + (this.levelName ? ' - ' + this.levelName : '');
-    this.levelText = this.scene.add.text(cx, padding + 56, levelLabel, style)
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
-
-    this.timeText = this.scene.add.text(cx, padding + 84, 'Waktu: 00:00', style)
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
-
-    this.coinText = this.scene.add.text(cx, padding + 112, 'Koin: ' + this.collectedCoins + ' / ' + this.totalCoins, {
-      fontSize: coinSize + 'px',
-      color: '#ffd700',
+    const val = (color, size) => ({
+      fontSize: size + 'px',
+      color: color,
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
+      strokeThickness: 3
+    });
 
-    this.muteText = this.scene.add.text(cx, padding + 140, '', {
-      fontSize: '14px',
+    const valSize = isMobile ? 18 : 20;
+    const subSize = isMobile ? 13 : 14;
+
+    // ========== Baris 1: NYAWA (kiri) + SKOR (kanan) ==========
+    const r1 = panelY + 22;
+    this.livesLbl = this.scene.add.text(cx - panelW / 4, r1 - 13, 'NYAWA', lbl)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+    this.livesText = this.scene.add.text(cx - panelW / 4, r1 + 3, '♥ ' + this.lives, val('#ff5252', valSize))
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+
+    this.scoreLbl = this.scene.add.text(cx + panelW / 4, r1 - 13, 'SKOR', lbl)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+    this.scoreText = this.scene.add.text(cx + panelW / 4, r1 + 3, '★ ' + this.score, val('#ffeb3b', valSize))
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+
+    // ========== Baris 2: Level name (tengah, di atas divider) ==========
+    const r2 = panelY + 52;
+    const levelLabel = 'Lv ' + this.level + (this.levelName ? '  ·  ' + this.levelName : '');
+    this.levelText = this.scene.add.text(cx, r2, levelLabel, val('#ffffff', subSize))
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+
+    // ========== Baris 3: WAKTU (kiri) + KOIN (kanan) ==========
+    const r3 = panelY + 82;
+    this.timeLbl = this.scene.add.text(cx - panelW / 4, r3 - 12, 'WAKTU', lbl)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+    this.timeText = this.scene.add.text(cx - panelW / 4, r3 + 3, '00:00', val('#90caf9', subSize))
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+
+    this.coinLbl = this.scene.add.text(cx + panelW / 4, r3 - 12, 'KOIN', lbl)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+    this.coinText = this.scene.add.text(cx + panelW / 4, r3 + 3, '◉ ' + this.collectedCoins + '/' + this.totalCoins, val('#ffd700', subSize))
+      .setOrigin(0.5).setScrollFactor(0).setDepth(50);
+
+    // ========== Mute indicator (di bawah panel) ==========
+    this.muteText = this.scene.add.text(cx, panelY + panelH + 4, '🔇 MUTED', {
+      fontSize: '12px',
       color: '#ff8080',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 2
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
+    this.muteText.setVisible(false);
 
-    // VERSION di tengah-bawah
-    this.versionText = this.scene.add.text(
-      cx, H - 8, 'v12', {
-      fontSize: '11px',
-      color: '#aaaaaa',
+    // ========== Versi di bawah layar ==========
+    this.versionText = this.scene.add.text(cx, H - 4, 'v13', {
+      fontSize: '10px',
+      color: '#555555',
       fontFamily: 'Arial'
     }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(50);
 
-    // Desktop hint di pojok kanan-atas (desktop only, canvas muat)
+    // ========== Desktop hint (pojok kanan-atas, desktop only) ==========
     if (!isMobile) {
-      this.hintText = this.scene.add.text(
-        W - 16, 16,
-        'P: Pause  |  R: Restart  |  M: Mute  |  WASD/Panah: Gerak  |  Spasi: Lompat',
-        {
-          fontSize: hintSize + 'px',
-          color: '#ffffff',
-          fontFamily: 'Arial',
-          stroke: '#000000',
-          strokeThickness: 2
-        }
-      ).setOrigin(1, 0).setScrollFactor(0).setDepth(50);
+      this.hintText = this.scene.add.text(W - 12, 12,
+        'P: Pause  |  R: Restart  |  M: Mute  |  WASD/Arrow: Gerak  |  Spasi: Lompat', {
+        fontSize: '10px',
+        color: '#cccccc',
+        fontFamily: 'Arial',
+        stroke: '#000',
+        strokeThickness: 2
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(50);
     }
   }
 
   setLives(n) {
     this.lives = n;
-    this.livesText.setText('Nyawa: ' + this.lives);
+    this.livesText.setText('♥ ' + this.lives);
   }
 
   setScore(s) {
     this.score = s;
-    this.scoreText.setText('Skor: ' + this.score);
+    this.scoreText.setText('★ ' + this.score);
   }
 
   setTime(ms) {
@@ -116,17 +140,17 @@ export default class HUD {
     const min = Math.floor(totalSec / 60);
     const sec = totalSec % 60;
     this.timeText.setText(
-      'Waktu: ' + String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0')
+      String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0')
     );
   }
 
   addCoin() {
     this.collectedCoins += 1;
-    this.coinText.setText('Koin: ' + this.collectedCoins + ' / ' + this.totalCoins);
+    this.coinText.setText('◉ ' + this.collectedCoins + '/' + this.totalCoins);
   }
 
   setMute(muted) {
     this.muted = muted;
-    this.muteText.setText(muted ? '[M] MUTED' : '');
+    this.muteText.setVisible(muted);
   }
 }

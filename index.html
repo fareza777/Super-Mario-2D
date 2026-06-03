@@ -46,27 +46,31 @@
       display: block;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
       border-radius: 2px;
-      /* v11: biarkan Phaser atur ukuran canvas via scale mode,
-         jangan paksa max-width/height di CSS supaya scale penuh */
+      /* v13: biarkan Phaser HEIGHT_CONTROLS_WIDTH atur ukuran
+         canvas. max-width/height sebagai safety cap saja. */
     }
-    /* Mobile: biarkan Phaser Scale.FIT yang atur ukuran canvas
-       (3:4 portrait, pas di container). max-height jadi safety
-       cap saja. */
+    /* Mobile: Phaser Scale.HEIGHT_CONTROLS_WIDTH isi penuh tinggi
+       container. Sisi horizontal sedikit overflow (di-clip). */
     body.touch-device #game-container canvas {
       max-width: 100%;
       max-height: 100%;
     }
 
     /* ========== Zona kontrol (bawah) - HTML asli ========== */
+    /* v13: kontrol dikecilkan ke 100px supaya canvas game bisa
+       lebih besar. Tombol didesain ulang dengan gradient, shadow
+       3D, dan animasi tekan. */
     #touch-controls {
-      flex: 0 0 120px;
+      flex: 0 0 100px;
       display: none;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 18px;
-      background: linear-gradient(180deg, #1a1a1a 0%, #2a2a3a 100%);
-      border-top: 2px solid rgba(76, 175, 80, 0.35);
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      background: linear-gradient(180deg, rgba(15, 20, 35, 0.96) 0%, rgba(30, 35, 55, 0.96) 100%);
+      border-top: 1px solid rgba(76, 175, 80, 0.25);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
     .ctrl-group {
       display: flex;
@@ -74,8 +78,7 @@
       align-items: center;
     }
     .ctrl-btn {
-      border: 3px solid rgba(255, 255, 255, 0.75);
-      border-radius: 50%;
+      border: none;
       color: #fff;
       font-weight: bold;
       font-family: Arial, sans-serif;
@@ -90,40 +93,105 @@
       margin: 0;
       outline: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform 0.05s ease, background 0.05s ease;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      position: relative;
     }
+
+    /* D-pad: kotak rounded biru dengan gradient & inner glow */
     .ctrl-btn.dpad {
-      width: 64px;
-      height: 64px;
-      font-size: 26px;
-      background: #2196f3;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(145deg, #42a5f5 0%, #1976d2 100%);
+      box-shadow:
+        0 4px 0 #0d47a1,
+        0 6px 12px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+      border-radius: 14px;
     }
-    .ctrl-btn.dpad:active, .ctrl-btn.dpad.pressed {
-      background: #64b5f6;
-      transform: scale(0.9);
+    .ctrl-btn.dpad:active,
+    .ctrl-btn.dpad.pressed {
+      transform: translateY(3px);
+      box-shadow:
+        0 1px 0 #0d47a1,
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
+
+    /* Jump: lingkaran hijau besar */
     .ctrl-btn.action {
-      width: 80px;
-      height: 80px;
-      font-size: 36px;
-      background: #4caf50;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(145deg, #66bb6a 0%, #2e7d32 100%);
+      box-shadow:
+        0 5px 0 #1b5e20,
+        0 7px 14px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+      border-radius: 50%;
+      font-size: 30px;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+      letter-spacing: 0.5px;
     }
-    .ctrl-btn.action:active, .ctrl-btn.action.pressed {
-      background: #81c784;
-      transform: scale(0.9);
+    .ctrl-btn.action:active,
+    .ctrl-btn.action.pressed {
+      transform: translateY(3px) scale(0.96);
+      box-shadow:
+        0 2px 0 #1b5e20,
+        0 3px 6px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
+
+    /* Pause: lingkaran abu-abu kecil */
     .ctrl-btn.pause {
-      width: 50px;
-      height: 50px;
-      font-size: 18px;
-      background: #607d8b;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(145deg, #78909c 0%, #37474f 100%);
+      box-shadow:
+        0 3px 0 #263238,
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+      border-radius: 50%;
     }
-    .ctrl-btn.pause:active, .ctrl-btn.pause.pressed {
-      background: #78909c;
-      transform: scale(0.9);
+    .ctrl-btn.pause:active,
+    .ctrl-btn.pause.pressed {
+      transform: translateY(2px);
+      box-shadow:
+        0 1px 0 #263238,
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* Panah kiri/kanan dari CSS border (tanpa emoji) */
+    .arrow {
+      width: 0;
+      height: 0;
+    }
+    .arrow-left {
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 16px solid #fff;
+      filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.25));
+    }
+    .arrow-right {
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 16px solid #fff;
+      filter: drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.25));
+    }
+
+    /* Pause bars: dua kotak putih竖直 */
+    .pause-bars {
+      display: flex;
+      gap: 4px;
+    }
+    .pause-bars span {
+      width: 5px;
+      height: 16px;
+      background: #fff;
+      border-radius: 1.5px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
     }
 
     /* ========== Tampilkan kontrol hanya di touch device ========== */
@@ -144,12 +212,18 @@
   <div id="game-container"></div>
   <div id="touch-controls">
     <div class="ctrl-group left">
-      <button id="btn-left" class="ctrl-btn dpad" type="button">&#9664;</button>
-      <button id="btn-right" class="ctrl-btn dpad" type="button">&#9654;</button>
+      <button id="btn-left" class="ctrl-btn dpad" type="button" aria-label="Kiri">
+        <div class="arrow arrow-left"></div>
+      </button>
+      <button id="btn-right" class="ctrl-btn dpad" type="button" aria-label="Kanan">
+        <div class="arrow arrow-right"></div>
+      </button>
     </div>
     <div class="ctrl-group right">
-      <button id="btn-pause" class="ctrl-btn pause" type="button">II</button>
-      <button id="btn-action" class="ctrl-btn action" type="button">A</button>
+      <button id="btn-pause" class="ctrl-btn pause" type="button" aria-label="Pause">
+        <div class="pause-bars"><span></span><span></span></div>
+      </button>
+      <button id="btn-action" class="ctrl-btn action" type="button" aria-label="Lompat">A</button>
     </div>
   </div>
 
@@ -169,10 +243,12 @@
       if (!btn) return;
       var press = function(e) {
         e.preventDefault();
+        btn.classList.add('pressed');
         if (onPress) onPress();
       };
       var release = function(e) {
         if (e && e.preventDefault) e.preventDefault();
+        btn.classList.remove('pressed');
         if (onRelease) onRelease();
       };
       btn.addEventListener('pointerdown', press);
@@ -207,6 +283,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=12"></script>
+  <script type="module" src="src/main.js?v=13"></script>
 </body>
 </html>

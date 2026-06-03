@@ -25,7 +25,11 @@ const config = {
   backgroundColor: '#87CEEB',
   pixelArt: true,
   scale: {
-    mode: Phaser.Scale.FIT,
+    // v13: HEIGHT_CONTROLS_WIDTH supaya canvas mengisi penuh
+    // tinggi container (HP portrait). Sisi kiri/kanan sedikit
+    // overflow (di-clip), tapi player selalu di tengah sehingga
+    // tetap terlihat. Tidak ada gap vertikal.
+    mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 600,
     height: 800,
