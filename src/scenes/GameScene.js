@@ -112,6 +112,9 @@ export default class GameScene extends Phaser.Scene {
         this.levelData.name,
         (this.levelData.coins || []).length
       );
+      // v14: hubungkan tombol home & pause di HUD
+      this.hud.setHomeCallback(() => this._confirmGoHome());
+      this.hud.setPauseCallback(() => this.togglePause());
       this.createTouchControls();
 
       sound.init();
@@ -279,6 +282,94 @@ export default class GameScene extends Phaser.Scene {
   handleAdvanceKey() {
     if (this.gameState === 'won') {
       this.advanceToNext();
+    }
+  }
+
+  // ============================================================
+  // =============== v14: HOME & CONFIRM DIALOG ================
+  // ============================================================
+
+  /**
+   * Konfirmasi sebelum kembali ke menu utama. Jika pemain
+   * tidak sengaja tap tombol home, bisa batal.
+   */
+  _confirmGoHome() {
+    if (this.gameState === 'won' || this.gameState === 'lost') {
+      // langsung kembali kalau sudah di layar menang/kalah
+      this.scene.start('LevelSelectScene');
+      return;
+    }
+    if (this._confirmOverlay) return;  // sudah ada
+    this._confirmOverlay = [];
+    const cam = this.cameras.main;
+    const W = cam.width;
+    const H = cam.height;
+    const cx = W / 2;
+    const cy = H / 2;
+    const isMobile = W < 600;
+
+    // Pause game sementara
+    this.gameState = 'paused';
+    this.physics.world.pause();
+    this.time.paused = true;
+
+    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 480), 220, 0x000000, 0.82)
+      .setScrollFactor(0).setDepth(300);
+    const title = this.add.text(cx, cy - 70, 'Kembali ke Menu?', {
+      fontSize: (isMobile ? 22 : 26) + 'px',
+      color: '#ffeb3b',
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(301);
+    const sub = this.add.text(cx, cy - 35, 'Progress level ini akan hilang.', {
+      fontSize: '14px',
+      color: '#cccccc',
+      fontFamily: 'Arial',
+      stroke: '#000',
+      strokeThickness: 2
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(301);
+
+    // Tombol Ya
+    const yaBtn = this.add.rectangle(cx - 70, cy + 30, 120, 48, 0x4caf50)
+      .setStrokeStyle(2, 0xffffff, 0.5)
+      .setScrollFactor(0).setDepth(301).setInteractive({ useHandCursor: true });
+    const yaTxt = this.add.text(cx - 70, cy + 30, 'YA', {
+      fontSize: '20px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(302);
+    yaBtn.on('pointerdown', () => {
+      sound.play('click');
+      this._dismissConfirm();
+      this.scene.start('LevelSelectScene');
+    });
+    yaBtn.on('pointerover', () => yaBtn.setFillStyle(0x66bb6a));
+    yaBtn.on('pointerout', () => yaBtn.setFillStyle(0x4caf50));
+
+    // Tombol Batal
+    const batalBtn = this.add.rectangle(cx + 70, cy + 30, 120, 48, 0x757575)
+      .setStrokeStyle(2, 0xffffff, 0.5)
+      .setScrollFactor(0).setDepth(301).setInteractive({ useHandCursor: true });
+    const batalTxt = this.add.text(cx + 70, cy + 30, 'BATAL', {
+      fontSize: '20px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(302);
+    batalBtn.on('pointerdown', () => {
+      sound.play('click');
+      this._dismissConfirm();
+      this.resumeGame();
+    });
+    batalBtn.on('pointerover', () => batalBtn.setFillStyle(0x9e9e9e));
+    batalBtn.on('pointerout', () => batalBtn.setFillStyle(0x757575));
+
+    this._confirmOverlay.push(bg, title, sub, yaBtn, yaTxt, batalBtn, batalTxt);
+  }
+
+  _dismissConfirm() {
+    if (this._confirmOverlay) {
+      this._confirmOverlay.forEach(o => o.destroy());
+      this._confirmOverlay = null;
     }
   }
 
@@ -745,11 +836,16 @@ export default class GameScene extends Phaser.Scene {
     const cy = H / 2;
     const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    this.add.rectangle(cx, cy, Math.min(W - 40, 600), Math.min(H - 40, 360), 0x000000, 0.78)
-      .setScrollFactor(0).setDepth(99);
+    // v14: overlay lebih besar & tombol lebih jelas. INTERACTIVE
+    // supaya klik di area kosong tetap bisa "menu" (safety net).
+    const ovW = Math.min(W - 40, 560);
+    const ovH = Math.min(H - 40, 380);
+    const ov = this.add.rectangle(cx, cy, ovW, ovH, 0x000000, 0.82)
+      .setScrollFactor(0).setDepth(99)
+      .setStrokeStyle(3, 0xff5252, 0.6);
 
-    this.add.text(cx, cy - (isMobile ? 110 : 120), 'GAME OVER', {
-      fontSize: (isMobile ? 42 : 54) + 'px',
+    this.add.text(cx, cy - (isMobile ? 130 : 145), 'GAME OVER', {
+      fontSize: (isMobile ? 40 : 52) + 'px',
       color: '#ff5252',
       fontFamily: 'Arial',
       fontStyle: 'bold',
@@ -757,7 +853,7 @@ export default class GameScene extends Phaser.Scene {
       strokeThickness: 6
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    this.add.text(cx, cy - (isMobile ? 65 : 75), 'Skor: ' + this.score, {
+    this.add.text(cx, cy - (isMobile ? 85 : 95), 'Skor: ' + this.score, {
       fontSize: (isMobile ? 18 : 22) + 'px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -765,19 +861,65 @@ export default class GameScene extends Phaser.Scene {
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    const btnY0 = isMobile ? cy - 15 : cy - 15;
-    this.makeMenuButton(cx, btnY0, 'Lanjut (+1 nyawa)', () => {
+    // v14: tombol lebih besar & jelas. 3 opsi: retry, ulangi, menu
+    const btnW = isMobile ? W - 80 : 280;
+    const btnH = isMobile ? 52 : 48;
+    const gap = isMobile ? 8 : 10;
+    const startY = cy - (isMobile ? 30 : 30);
+
+    // Retry level dengan 1 nyawa (continue)
+    const retry = this.add.rectangle(cx, startY, btnW, btnH, 0x4caf50)
+      .setScrollFactor(0).setDepth(101)
+      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(cx, startY, 'LANJUT (+1 NYAWA)', {
+      fontSize: (isMobile ? 18 : 18) + 'px',
+      color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+    retry.on('pointerdown', () => {
+      sound.play('click');
       this.lives = 1;
       this.hud.setLives(this.lives);
       this.scene.start('GameScene', { level: this.currentLevel });
-    }, 100);
-    this.makeMenuButton(cx, btnY0 + 50, 'Ulangi dari 0', () => {
+    });
+    retry.on('pointerover', () => retry.setFillStyle(0x66bb6a));
+    retry.on('pointerout', () => retry.setFillStyle(0x4caf50));
+
+    // Ulangi dari awal (5 nyawa)
+    const restart = this.add.rectangle(cx, startY + btnH + gap, btnW, btnH, 0x2196f3)
+      .setScrollFactor(0).setDepth(101)
+      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(cx, startY + btnH + gap, 'ULANGI DARI 0 (5 NYAWA)', {
+      fontSize: (isMobile ? 18 : 18) + 'px',
+      color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+    restart.on('pointerdown', () => {
+      sound.play('click');
       this.lives = 5;
       this.scene.start('GameScene', { level: this.currentLevel });
-    }, 100);
-    this.makeMenuButton(cx, btnY0 + 100, 'Menu Level', () => {
+    });
+    restart.on('pointerover', () => restart.setFillStyle(0x42a5f5));
+    restart.on('pointerout', () => restart.setFillStyle(0x2196f3));
+
+    // Menu (paling menonjol, warna oranye)
+    const menu = this.add.rectangle(cx, startY + 2 * (btnH + gap), btnW, btnH, 0xff9800)
+      .setScrollFactor(0).setDepth(101)
+      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(cx, startY + 2 * (btnH + gap), 'KEMBALI KE MENU', {
+      fontSize: (isMobile ? 18 : 18) + 'px',
+      color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+    menu.on('pointerdown', () => {
+      sound.play('click');
       this.scene.start('LevelSelectScene');
-    }, 100);
+    });
+    menu.on('pointerover', () => menu.setFillStyle(0xffb74d));
+    menu.on('pointerout', () => menu.setFillStyle(0xff9800));
   }
 
   togglePause() {

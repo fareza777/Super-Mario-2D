@@ -8,6 +8,8 @@
  *
  * v11: integrasi dengan MusicManager — toggleMute juga mute BGM
  *      dan ambient.
+ * v14: volume control (0-1) + sound on/off (soundEnabled).
+ *      setVolume() dan setSoundEnabled() untuk SettingsScene.
  *
  * Tipe suara yang tersedia:
  *   - jump     : sweep naik pendek (saat lompat)
@@ -29,6 +31,8 @@ class SoundManager {
     this.masterGain = null;
     this.enabled = true;
     this.muted = false;
+    this.volume = 0.5;       // v14: 0..1
+    this.soundEnabled = true; // v14: master on/off
   }
 
   init() {
@@ -41,11 +45,17 @@ class SoundManager {
       }
       this.ctx = new Ctx();
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.25;
+      this._applyGain();
       this.masterGain.connect(this.ctx.destination);
     } catch (e) {
       this.enabled = false;
     }
+  }
+
+  _applyGain() {
+    if (!this.masterGain) return;
+    const v = (this.soundEnabled && !this.muted) ? this.volume : 0;
+    this.masterGain.gain.value = v;
   }
 
   resume() {
@@ -56,16 +66,37 @@ class SoundManager {
 
   toggleMute() {
     this.muted = !this.muted;
-    if (this.masterGain) {
-      this.masterGain.gain.value = this.muted ? 0 : 0.25;
-    }
-    // v11: sinkronkan dengan MusicManager
+    this._applyGain();
     if (music) music.setMuted(this.muted);
     return this.muted;
   }
 
+  // v14: set volume 0..1
+  setVolume(v) {
+    this.volume = Math.max(0, Math.min(1, v));
+    this._applyGain();
+  }
+
+  getVolume() {
+    return this.volume;
+  }
+
+  // v14: master sound on/off
+  setSoundEnabled(on) {
+    this.soundEnabled = !!on;
+    this._applyGain();
+    if (music) {
+      if (on) music.unmuteForSettings();
+      else music.muteForSettings();
+    }
+  }
+
+  isSoundEnabled() {
+    return this.soundEnabled;
+  }
+
   play(type) {
-    if (!this.enabled || this.muted || !this.ctx) return;
+    if (!this.enabled || this.muted || !this.soundEnabled || !this.ctx) return;
     this.resume();
     switch (type) {
       case 'jump':     this._jump();     break;

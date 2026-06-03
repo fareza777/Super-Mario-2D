@@ -113,10 +113,28 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createFooter() {
+    const W = this.cameras.main.width;
+    const H = this.cameras.main.height;
+
     this.add.text(300, 750, 'Fase 3 - 100 Level - Powered by Phaser 3', {
       fontSize: '13px',
       color: '#999999',
       fontFamily: 'Arial'
     }).setOrigin(0.5);
+
+    // v14: tombol Pengaturan (kanan-bawah)
+    const setBtn = this.add.rectangle(W - 50, H - 35, 140, 42, 0x455a64)
+      .setStrokeStyle(2, 0xffffff, 0.4)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(W - 50, H - 35, '⚙ Pengaturan', {
+      fontSize: '16px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5);
+    setBtn.on('pointerdown', () => {
+      import('../systems/SoundManager.js').then(({ sound }) => sound.play('click'));
+      this.scene.start('SettingsScene', { returnTo: 'IntroScene' });
+    });
+    setBtn.on('pointerover', () => setBtn.setFillStyle(0x607d8b));
+    setBtn.on('pointerout', () => setBtn.setFillStyle(0x455a64));
   }
 }

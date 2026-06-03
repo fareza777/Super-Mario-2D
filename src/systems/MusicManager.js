@@ -88,6 +88,7 @@ class MusicManager {
     this.ambientGain = null;
     this.muted = false;
     this.volume = 0.5;
+    this.bgmEnabled = true;  // v14: BGM on/off dari settings
     this.isPlayingBGM = false;
     this.bgmTimers = [];
     this.windSource = null;
@@ -103,7 +104,7 @@ class MusicManager {
       return;
     }
     this.masterGain = this.context.createGain();
-    this.masterGain.gain.value = this.muted ? 0 : this.volume;
+    this._applyGain();
     this.masterGain.connect(this.context.destination);
 
     this.musicGain = this.context.createGain();
@@ -122,6 +123,11 @@ class MusicManager {
     this.ambientGain.connect(this.masterGain);
   }
 
+  _applyGain() {
+    if (!this.masterGain) return;
+    this.masterGain.gain.value = this.muted ? 0 : this.volume;
+  }
+
   resume() {
     if (this.context && this.context.state === 'suspended') {
       this.context.resume();
@@ -130,19 +136,51 @@ class MusicManager {
 
   setMuted(muted) {
     this.muted = muted;
-    if (this.masterGain) {
-      this.masterGain.gain.value = muted ? 0 : this.volume;
-    }
+    this._applyGain();
   }
 
   isMuted() {
     return this.muted;
   }
 
+  // v14: volume 0..1
+  setVolume(v) {
+    this.volume = Math.max(0, Math.min(1, v));
+    this._applyGain();
+  }
+
+  getVolume() {
+    return this.volume;
+  }
+
+  // v14: BGM on/off (dari SettingsScene)
+  setBGMEnabled(on) {
+    this.bgmEnabled = !!on;
+    if (!on) {
+      this.stopBGM();
+      this.stopWind();
+    }
+  }
+
+  isBGMEnabled() {
+    return this.bgmEnabled;
+  }
+
+  // v14: dipanggil dari SoundManager.setSoundEnabled(false)
+  muteForSettings() {
+    this.stopBGM();
+    this.stopWind();
+  }
+
+  unmuteForSettings() {
+    // BGM/wind akan di-restart oleh scene berikutnya
+  }
+
   /**
    * Mainkan BGM. Otomatis stop BGM sebelumnya.
    */
   playBGM(trackName) {
+    if (!this.bgmEnabled) return;
     this.stopBGM();
     this.init();
     this.resume();
@@ -220,6 +258,7 @@ class MusicManager {
    * untuk efek "gusting".
    */
   playWind() {
+    if (!this.bgmEnabled) return;
     if (!this.context) return;
     if (this.windSource) return;  // sudah jalan
     this.init();

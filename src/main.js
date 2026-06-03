@@ -18,6 +18,7 @@ import LevelSelectScene from './scenes/LevelSelectScene.js';
 import GameScene from './scenes/GameScene.js';
 import CutScene from './scenes/CutScene.js';
 import EndingScene from './scenes/EndingScene.js';
+import SettingsScene from './scenes/SettingsScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -50,7 +51,8 @@ const config = {
     LevelSelectScene,
     GameScene,
     CutScene,
-    EndingScene
+    EndingScene,
+    SettingsScene
   ]
 };
 

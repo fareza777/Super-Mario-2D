@@ -104,8 +104,48 @@ export default class HUD {
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
     this.muteText.setVisible(false);
 
+    // ========== Tombol Home (kiri-atas) ==========
+    // v14: tombol kecil untuk kembali ke menu utama dari dalam game
+    const homeX = 8;
+    const homeY = 8;
+    const homeR = 18;
+    this.homeBtn = this.scene.add.circle(homeX + homeR, homeY + homeR, homeR, 0x1a237e, 0.85)
+      .setStrokeStyle(2, 0x4caf50, 0.7)
+      .setScrollFactor(0).setDepth(60)
+      .setInteractive({ useHandCursor: true });
+    this.homeIcon = this.scene.add.text(homeX + homeR, homeY + homeR, '⌂', {
+      fontSize: '22px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(61);
+    this.homeBtn.on('pointerdown', () => {
+      if (this._onHome) this._onHome();
+    });
+    this.homeBtn.on('pointerover', () => this.homeBtn.setFillStyle(0x283593, 0.9));
+    this.homeBtn.on('pointerout', () => this.homeBtn.setFillStyle(0x1a237e, 0.85));
+
+    // ========== Tombol Pause (kanan-atas) ==========
+    // v14: tombol pause tambahan di HUD (selain HTML button di mobile)
+    const pauseR = 18;
+    const pauseX = W - 8 - pauseR;
+    this.pauseBtn = this.scene.add.circle(pauseX, homeY + pauseR, pauseR, 0x37474f, 0.85)
+      .setStrokeStyle(2, 0xffffff, 0.5)
+      .setScrollFactor(0).setDepth(60)
+      .setInteractive({ useHandCursor: true });
+    // dua bar竖直 pause
+    this.pauseIcon1 = this.scene.add.rectangle(pauseX - 4, homeY + pauseR, 4, 14, 0xffffff)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(61);
+    this.pauseIcon2 = this.scene.add.rectangle(pauseX + 4, homeY + pauseR, 4, 14, 0xffffff)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(61);
+    this.pauseBtn.on('pointerdown', () => {
+      if (this._onPause) this._onPause();
+    });
+    this.pauseBtn.on('pointerover', () => this.pauseBtn.setFillStyle(0x455a64, 0.9));
+    this.pauseBtn.on('pointerout', () => this.pauseBtn.setFillStyle(0x37474f, 0.85));
+
     // ========== Versi di bawah layar ==========
-    this.versionText = this.scene.add.text(cx, H - 4, 'v13', {
+    this.versionText = this.scene.add.text(cx, H - 4, 'v14', {
       fontSize: '10px',
       color: '#555555',
       fontFamily: 'Arial'
@@ -152,5 +192,15 @@ export default class HUD {
   setMute(muted) {
     this.muted = muted;
     this.muteText.setVisible(muted);
+  }
+
+  // v14: callback saat tombol home ditekan
+  setHomeCallback(fn) {
+    this._onHome = fn;
+  }
+
+  // v14: callback saat tombol pause HUD ditekan
+  setPauseCallback(fn) {
+    this._onPause = fn;
   }
 }
