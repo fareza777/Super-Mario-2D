@@ -18,7 +18,7 @@ import LevelGenerator from '../systems/LevelGenerator.js';
 const manualLevels = [
   {
     id: 1,
-    name: 'Batas Dunia',
+    name: 'Edge of the World',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -48,7 +48,7 @@ const manualLevels = [
   },
   {
     id: 2,
-    name: 'Jejak Sunyi',
+    name: 'Silent Trail',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -81,7 +81,7 @@ const manualLevels = [
   },
   {
     id: 3,
-    name: 'Jiwa Tergusur',
+    name: 'Displaced Soul',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -122,7 +122,7 @@ const manualLevels = [
   },
   {
     id: 4,
-    name: 'Senja yang Padam',
+    name: 'Fading Dusk',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -155,7 +155,7 @@ const manualLevels = [
   },
   {
     id: 5,
-    name: 'Tangga Retak',
+    name: 'Cracked Stairs',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -192,7 +192,7 @@ const manualLevels = [
   },
   {
     id: 6,
-    name: 'Awan Beracun',
+    name: 'Poisoned Clouds',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -227,7 +227,7 @@ const manualLevels = [
   },
   {
     id: 7,
-    name: 'Reruntuhan',
+    name: 'Ruins',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -267,7 +267,7 @@ const manualLevels = [
   },
   {
     id: 8,
-    name: 'Penjelajah Akhir',
+    name: 'Final Explorer',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [

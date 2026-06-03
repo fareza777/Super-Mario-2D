@@ -85,7 +85,7 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createSubtitle() {
-    this.add.text(300, 235, 'Lewati kegelapan. Temukan kedamaian.', {
+    this.add.text(300, 235, 'Cross the darkness. Find peace.', {
       fontSize: '16px',
       color: '#ce93d8',
       fontFamily: 'Arial',

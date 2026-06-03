@@ -124,9 +124,9 @@ export default class GameScene extends Phaser.Scene {
       // v10: dengarkan event pause dari HTML button
       this.game.events.on('mobile-pause', this.togglePause, this);
 
-      // v11: BGM berdasarkan range level + ambient wind
+      // v17: BGM per level range + ambient abyss hum
       this._playBGMForLevel();
-      music.playWind();
+      music.playAmbient();
 
       // stop musik saat scene shutdown
       this.events.once('shutdown', () => {
@@ -760,8 +760,8 @@ export default class GameScene extends Phaser.Scene {
     // Hint
     const hintY = otherBtnY + 95;
     const hintText = isMobile
-      ? 'KETUK TOMBOL UNTUK MELANJUTKAN'
-      : 'TEKAN SPACE / ENTER  atau  KLIK TOMBOL';
+      ? 'TAP BUTTON TO CONTINUE'
+      : 'PRESS SPACE / ENTER  or  CLICK BUTTON';
     const hint = this.add.text(cx, hintY, hintText, {
       fontSize: (isMobile ? 12 : 14) + 'px',
       color: '#ce93d8',
@@ -1035,13 +1035,13 @@ export default class GameScene extends Phaser.Scene {
     this.scene.start('GameScene', { level: this.currentLevel });
   }
 
-  // ===== v11: BGM selection per level range =====
+  // ===== v17: BGM selection per level range (dark fantasy tracks) =====
   _playBGMForLevel() {
     let track;
-    if (this.currentLevel <= 20) track = 'adventure';
-    else if (this.currentLevel <= 50) track = 'challenge';
-    else if (this.currentLevel <= 99) track = 'epic';
-    else track = 'ending';
+    if (this.currentLevel <= 30) track = 'passage';
+    else if (this.currentLevel <= 60) track = 'pursuit';
+    else if (this.currentLevel <= 99) track = 'cursed';
+    else track = 'peace';
     music.playBGM(track);
   }
 

@@ -101,17 +101,17 @@ export default class LevelGenerator {
       });
     }
 
-    // GrimPass: nama dunia bertema dark fantasy
+    // GrimPass: dark fantasy world names (English)
     const WORLD_NAMES = [
-      "Batas Dunia",
-      "Jejak yang Terlupakan",
-      "Jurang",
-      "Taman Tulang",
-      "Reruntuhan Terkutuk",
-      "Wilayah Bayangan",
-      "Puncak Terkutuk",
-      "Laut Jiwa",
-      "Kekosongan",
+      "Edge of the World",
+      "Forgotten Trail",
+      "The Abyss",
+      "Garden of Bones",
+      "Cursed Ruins",
+      "Shadowlands",
+      "Cursed Peak",
+      "Sea of Souls",
+      "The Void",
       "GrimPass"
     ];
 

@@ -27,7 +27,7 @@ export default class EndingScene extends Phaser.Scene {
   }
 
   create() {
-    music.playBGM('ending');
+    music.playBGM('peace');
     music.stopWind();
     this.events.once('shutdown', () => music.stopBGM());
 

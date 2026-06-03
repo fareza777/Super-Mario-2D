@@ -21,7 +21,7 @@ export default class CutScene extends Phaser.Scene {
   }
 
   create() {
-    music.playBGM('calm');
+    music.playBGM('whisper');
     music.stopWind();
     this.events.once('shutdown', () => music.stopBGM());
 
@@ -76,7 +76,7 @@ export default class CutScene extends Phaser.Scene {
         lineSpacing: 6
       }).setOrigin(0.5);
     } else {
-      this.add.text(300, 380, 'Melanjutkan perjalanan...', {
+      this.add.text(300, 380, 'Continuing the journey...', {
         fontSize: '20px',
         color: '#b0bec5',
         fontFamily: 'Arial',
