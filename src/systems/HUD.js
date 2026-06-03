@@ -2,8 +2,8 @@
  * src/systems/HUD.js
  * ---------------------------------------------------------------
  * Heads-Up Display: menampilkan nyawa, skor, level, timer, koin.
- * v11: dipusatkan (center) supaya tetap terlihat saat canvas
- *      extend horizontal di mobile (HEIGHT_CONTROLS_WIDTH mode).
+ * v12: dipusatkan (center) untuk canvas portrait 600x800.
+ *      HUD disusun vertikal di atas, versi di bawah.
  * ---------------------------------------------------------------
  */
 export default class HUD {
@@ -22,14 +22,14 @@ export default class HUD {
 
   create() {
     const cam = this.scene.cameras.main;
-    const W = cam.width;   // 800
-    const H = cam.height;  // 600
+    const W = cam.width;   // v12: 600 (portrait)
+    const H = cam.height;  // v12: 800
     const cx = W / 2;
-    const isMobile = W < 600;
-    const baseSize = isMobile ? 22 : 20;
-    const coinSize = isMobile ? 20 : 18;
-    const hintSize = isMobile ? 13 : 11;
-    const padding = isMobile ? 12 : 14;
+    const isMobile = W < 700;
+    const baseSize = isMobile ? 18 : 20;
+    const coinSize = isMobile ? 16 : 18;
+    const hintSize = isMobile ? 11 : 11;
+    const padding = isMobile ? 10 : 14;
 
     const style = {
       fontSize: baseSize + 'px',
@@ -46,7 +46,7 @@ export default class HUD {
       0x000000, 0.45
     ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(49);
 
-    // v11: semua text di-center horizontal, disusun vertikal dari atas
+    // v12: semua text di-center horizontal, disusun vertikal dari atas
     this.livesText = this.scene.add.text(cx, padding, 'Nyawa: ' + this.lives, style)
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(50);
 
@@ -78,7 +78,7 @@ export default class HUD {
 
     // VERSION di tengah-bawah
     this.versionText = this.scene.add.text(
-      cx, H - 8, 'v11', {
+      cx, H - 8, 'v12', {
       fontSize: '11px',
       color: '#aaaaaa',
       fontFamily: 'Arial'

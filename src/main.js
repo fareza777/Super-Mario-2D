@@ -7,7 +7,8 @@
  *           Game -> CutScene -> Game (untuk level 10,20,...,90)
  *           Game -> EndingScene (setelah level 100)
  *
- * Scale.FIT: canvas scale responsif untuk mobile (tetap 4:3)
+ * v12: canvas 3:4 portrait (600x800). Scale.FIT responsive.
+ *      Level world tetap 800x600 (kamera scroll horizontal).
  * ---------------------------------------------------------------
  */
 import BootScene from './scenes/BootScene.js';
@@ -20,25 +21,17 @@ import EndingScene from './scenes/EndingScene.js';
 
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
   parent: 'game-container',
   backgroundColor: '#87CEEB',
   pixelArt: true,
-  // v11: deteksi mobile → HEIGHT_CONTROLS_WIDTH (canvas isi tinggi,
-  // extend horizontal, kamera follow player → selalu kelihatan).
-  // Desktop → FIT (4:3 letterbox).
-  scale: (function() {
-    var isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    return {
-      mode: isMobile ? Phaser.Scale.HEIGHT_CONTROLS_WIDTH : Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-      width: 800,
-      height: 600,
-      parent: 'game-container',
-      expandParent: false
-    };
-  })(),
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 600,
+    height: 800,
+    parent: 'game-container',
+    expandParent: false
+  },
   physics: {
     default: 'arcade',
     arcade: {

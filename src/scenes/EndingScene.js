@@ -35,8 +35,8 @@ export default class EndingScene extends Phaser.Scene {
 
     // dekorasi bintang
     for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(0, 800);
-      const y = Phaser.Math.Between(0, 600);
+      const x = Phaser.Math.Between(0, 600);
+      const y = Phaser.Math.Between(0, 800);
       const s = this.add.circle(x, y, 2, 0xffeb3b, 0.8);
       this.tweens.add({
         targets: s,
@@ -47,7 +47,7 @@ export default class EndingScene extends Phaser.Scene {
       });
     }
 
-    this.add.text(400, 70, story.ending.title, {
+    this.add.text(300, 100, story.ending.title, {
       fontSize: '72px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -55,7 +55,7 @@ export default class EndingScene extends Phaser.Scene {
       strokeThickness: 7
     }).setOrigin(0.5);
 
-    this.add.text(400, 175, story.ending.text, {
+    this.add.text(300, 280, story.ending.text, {
       fontSize: '19px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -63,13 +63,13 @@ export default class EndingScene extends Phaser.Scene {
       wordWrap: { width: 700 }
     }).setOrigin(0.5);
 
-    this.add.text(400, 300, 'Skor Total', {
+    this.add.text(300, 440, 'Skor Total', {
       fontSize: '22px',
       color: '#cccccc',
       fontFamily: 'Arial'
     }).setOrigin(0.5);
 
-    this.add.text(400, 340, String(this.finalScore), {
+    this.add.text(300, 480, String(this.finalScore), {
       fontSize: '44px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -77,15 +77,15 @@ export default class EndingScene extends Phaser.Scene {
       strokeThickness: 4
     }).setOrigin(0.5);
 
-    this.add.text(400, 405, 'Waktu: ' + formatTime(this.elapsedTime), {
+    this.add.text(300, 545, 'Waktu: ' + formatTime(this.elapsedTime), {
       fontSize: '24px',
       color: '#ffffff',
       fontFamily: 'Arial'
     }).setOrigin(0.5);
 
-    const btn = this.add.rectangle(400, 490, 240, 50, 0x2196f3)
+    const btn = this.add.rectangle(300, 680, 240, 50, 0x2196f3)
       .setStrokeStyle(2, 0xffffff).setInteractive({ useHandCursor: true });
-    this.add.text(400, 490, 'Kembali ke Menu', {
+    this.add.text(300, 680, 'Kembali ke Menu', {
       fontSize: '22px',
       color: '#ffffff',
       fontFamily: 'Arial',

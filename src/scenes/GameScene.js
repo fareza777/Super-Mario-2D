@@ -145,9 +145,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createBackground() {
-    const w = this.physics.world.bounds.width;
-    const h = this.physics.world.bounds.height;
-    this.add.rectangle(0, 0, w, h, 0x87CEEB).setOrigin(0, 0).setScrollFactor(0);
+    // v12: background isi seluruh camera view (600x800). Sisa 200px
+    // di bawah world (worldHeight=600) diisi sky color yang sama.
+    this.add.rectangle(0, 0, this.cameras.main.width, 800, 0x87CEEB)
+      .setOrigin(0, 0).setScrollFactor(0);
   }
 
   createPlatforms(platforms) {
@@ -883,7 +884,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   showEmptyState() {
-    this.add.text(400, 300, 'Belum ada level tersedia', {
+    this.add.text(300, 400, 'Belum ada level tersedia', {
       fontSize: '32px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -893,12 +894,12 @@ export default class GameScene extends Phaser.Scene {
   }
 
   showError(msg) {
-    this.add.text(400, 300, msg, {
+    this.add.text(300, 400, msg, {
       fontSize: '24px',
       color: '#ff5555',
       fontFamily: 'Arial',
       align: 'center',
-      wordWrap: { width: 700 },
+      wordWrap: { width: 560 },
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5);

@@ -49,14 +49,12 @@
       /* v11: biarkan Phaser atur ukuran canvas via scale mode,
          jangan paksa max-width/height di CSS supaya scale penuh */
     }
-    /* Mobile: canvas pakai tinggi container, extend horizontal,
-       overflow hidden supaya sisi kiri/kanan terclip tapi tengah
-       (diikuti player) selalu kelihatan. */
+    /* Mobile: biarkan Phaser Scale.FIT yang atur ukuran canvas
+       (3:4 portrait, pas di container). max-height jadi safety
+       cap saja. */
     body.touch-device #game-container canvas {
-      max-width: none;
+      max-width: 100%;
       max-height: 100%;
-      width: auto;
-      height: 100%;
     }
 
     /* ========== Zona kontrol (bawah) - HTML asli ========== */
@@ -209,6 +207,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=11"></script>
+  <script type="module" src="src/main.js?v=12"></script>
 </body>
 </html>

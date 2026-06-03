@@ -33,8 +33,8 @@ export default class IntroScene extends Phaser.Scene {
 
     // dekorasi bintang berkedip
     for (let i = 0; i < 40; i++) {
-      const x = Phaser.Math.Between(0, 800);
-      const y = Phaser.Math.Between(0, 600);
+      const x = Phaser.Math.Between(0, 600);
+      const y = Phaser.Math.Between(0, 800);
       const s = this.add.circle(x, y, 2, 0xffffff, 0.8);
       this.tweens.add({
         targets: s,
@@ -47,7 +47,7 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createTitle() {
-    this.add.text(400, 130, 'PETUALANGAN', {
+    this.add.text(300, 130, 'PETUALANGAN', {
       fontSize: '58px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -55,7 +55,7 @@ export default class IntroScene extends Phaser.Scene {
       strokeThickness: 6
     }).setOrigin(0.5);
 
-    this.add.text(400, 200, 'MARIO', {
+    this.add.text(300, 200, 'MARIO', {
       fontSize: '88px',
       color: '#ff5252',
       fontFamily: 'Arial',
@@ -65,7 +65,7 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createSubtitle() {
-    this.add.text(400, 275, '100 level menantang menanti!', {
+    this.add.text(300, 275, '100 level menantang menanti!', {
       fontSize: '22px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -75,7 +75,7 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createIntroText() {
-    this.add.text(400, 320, story.intro, {
+    this.add.text(300, 320, story.intro, {
       fontSize: '14px',
       color: '#cccccc',
       fontFamily: 'Arial',
@@ -85,9 +85,9 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createButtons() {
-    const btnStart = this.add.rectangle(400, 410, 240, 60, 0x4caf50)
+    const btnStart = this.add.rectangle(300, 410, 240, 60, 0x4caf50)
       .setStrokeStyle(3, 0xffffff).setInteractive({ useHandCursor: true });
-    this.add.text(400, 410, 'MULAI', {
+    this.add.text(300, 410, 'MULAI', {
       fontSize: '30px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -98,9 +98,9 @@ export default class IntroScene extends Phaser.Scene {
     btnStart.on('pointerover', () => btnStart.setFillStyle(0x66bb6a));
     btnStart.on('pointerout', () => btnStart.setFillStyle(0x4caf50));
 
-    const btnSelect = this.add.rectangle(400, 490, 240, 50, 0x2196f3)
+    const btnSelect = this.add.rectangle(300, 490, 240, 50, 0x2196f3)
       .setStrokeStyle(3, 0xffffff).setInteractive({ useHandCursor: true });
-    this.add.text(400, 490, 'Pilih Level', {
+    this.add.text(300, 490, 'Pilih Level', {
       fontSize: '24px',
       color: '#ffffff',
       fontFamily: 'Arial',
@@ -113,7 +113,7 @@ export default class IntroScene extends Phaser.Scene {
   }
 
   createFooter() {
-    this.add.text(400, 560, 'Fase 3 - 100 Level - Powered by Phaser 3', {
+    this.add.text(300, 750, 'Fase 3 - 100 Level - Powered by Phaser 3', {
       fontSize: '13px',
       color: '#999999',
       fontFamily: 'Arial'

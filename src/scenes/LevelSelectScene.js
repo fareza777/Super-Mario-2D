@@ -29,7 +29,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   }
 
   createTitle() {
-    this.add.text(400, 50, 'PILIH LEVEL', {
+    this.add.text(300, 50, 'PILIH LEVEL', {
       fontSize: '40px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -37,7 +37,7 @@ export default class LevelSelectScene extends Phaser.Scene {
       strokeThickness: 5
     }).setOrigin(0.5);
 
-    this.add.text(400, 92, 'Petualangan Mario - 100 Level', {
+    this.add.text(300, 92, 'Petualangan Mario - 100 Level', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'Arial'
@@ -55,11 +55,11 @@ export default class LevelSelectScene extends Phaser.Scene {
       const bestScore = LevelManager.getBestScore(level.id);
       const color = completed ? 0x2e7d32 : 0x1565c0;
 
-      const rect = this.add.rectangle(400, y, 500, 40, color);
+      const rect = this.add.rectangle(300, y, 500, 40, color);
       rect.setStrokeStyle(2, 0xffffff, 0.3);
       rect.setInteractive({ useHandCursor: true });
 
-      const numText = this.add.text(200, y, String(level.id).padStart(3, '0'), {
+      const numText = this.add.text(120, y, String(level.id).padStart(3, '0'), {
         fontSize: '18px',
         color: '#ffffff',
         fontFamily: 'Arial',
@@ -67,7 +67,7 @@ export default class LevelSelectScene extends Phaser.Scene {
         strokeThickness: 3
       }).setOrigin(0.5);
 
-      const nameText = this.add.text(230, y, level.name, {
+      const nameText = this.add.text(150, y, level.name, {
         fontSize: '17px',
         color: '#ffffff',
         fontFamily: 'Arial',
@@ -76,7 +76,7 @@ export default class LevelSelectScene extends Phaser.Scene {
       }).setOrigin(0, 0.5);
 
       const statusText = completed ? ('Selesai  ' + bestScore) : 'Belum';
-      const statusTxt = this.add.text(680, y, statusText, {
+      const statusTxt = this.add.text(560, y, statusText, {
         fontSize: '14px',
         color: completed ? '#ffeb3b' : '#cccccc',
         fontFamily: 'Arial',
@@ -93,7 +93,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   }
 
   createScrollHint() {
-    this.add.text(780, 110, '↕ scroll', {
+    this.add.text(580, 110, '↕ scroll', {
       fontSize: '12px',
       color: '#aaaaaa',
       fontFamily: 'Arial'
@@ -103,7 +103,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   createFooter() {
     const totalLevels = levels.length;
     const completedCount = LevelManager.getCompletedLevels().length;
-    this.add.text(400, 580,
+    this.add.text(300, 760,
       'Klik level untuk mulai  |  ' + completedCount + ' / ' + totalLevels + ' selesai',
       {
         fontSize: '13px',
@@ -115,7 +115,7 @@ export default class LevelSelectScene extends Phaser.Scene {
 
   setupScroll() {
     const totalHeight = levels.length * 50;
-    const visibleHeight = 420; // area antara y=130 dan y=550
+    const visibleHeight = 600; // area antara y=130 dan y=730
     const minY = -(totalHeight - visibleHeight);
 
     this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {

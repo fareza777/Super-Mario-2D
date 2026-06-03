@@ -28,8 +28,8 @@ export default class CutScene extends Phaser.Scene {
 
     // dekorasi bintang
     for (let i = 0; i < 25; i++) {
-      const x = Phaser.Math.Between(0, 800);
-      const y = Phaser.Math.Between(0, 600);
+      const x = Phaser.Math.Between(0, 600);
+      const y = Phaser.Math.Between(0, 800);
       const s = this.add.circle(x, y, 2, 0xffffff, 0.6);
       this.tweens.add({
         targets: s,
@@ -40,7 +40,7 @@ export default class CutScene extends Phaser.Scene {
       });
     }
 
-    this.add.text(400, 80, 'DUNIA ' + Math.ceil(this.levelNumber / 10), {
+    this.add.text(300, 100, 'DUNIA ' + Math.ceil(this.levelNumber / 10), {
       fontSize: '44px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -49,7 +49,7 @@ export default class CutScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     if (this.cutscene) {
-      this.add.text(400, 155, this.cutscene.title, {
+      this.add.text(300, 180, this.cutscene.title, {
         fontSize: '28px',
         color: '#ff8080',
         fontFamily: 'Arial',
@@ -57,7 +57,7 @@ export default class CutScene extends Phaser.Scene {
         strokeThickness: 3
       }).setOrigin(0.5);
 
-      this.add.text(400, 280, this.cutscene.text, {
+      this.add.text(300, 400, this.cutscene.text, {
         fontSize: '20px',
         color: '#ffffff',
         fontFamily: 'Arial',
@@ -65,16 +65,16 @@ export default class CutScene extends Phaser.Scene {
         wordWrap: { width: 700 }
       }).setOrigin(0.5);
     } else {
-      this.add.text(400, 280, 'Lanjut ke level berikutnya...', {
+      this.add.text(300, 400, 'Lanjut ke level berikutnya...', {
         fontSize: '20px',
         color: '#ffffff',
         fontFamily: 'Arial'
       }).setOrigin(0.5);
     }
 
-    const btn = this.add.rectangle(400, 480, 200, 50, 0x4caf50)
+    const btn = this.add.rectangle(300, 680, 200, 50, 0x4caf50)
       .setStrokeStyle(2, 0xffffff).setInteractive({ useHandCursor: true });
-    this.add.text(400, 480, 'Lanjut', {
+    this.add.text(300, 680, 'Lanjut', {
       fontSize: '24px',
       color: '#ffffff',
       fontFamily: 'Arial',
