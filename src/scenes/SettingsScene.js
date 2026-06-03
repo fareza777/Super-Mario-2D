@@ -1,16 +1,16 @@
 /**
  * src/scenes/SettingsScene.js
  * ---------------------------------------------------------------
- * v17: Menu pengaturan suara GrimPass (tema gelap).
- * Bisa diakses dari IntroScene, LevelSelectScene, dan pause.
+ * v19: GrimPass sound settings menu (dark theme).
+ * Accessible from IntroScene, LevelSelectScene, and pause.
  *
- * Fitur:
- *   - Toggle MUSIK (BGM + ambient wind) — on/off terpisah
- *   - Toggle EFEK SUARA (SFX: koin, lompat, musuh, dll) — on/off
- *   - Slider VOLUME (0-100%) — mengatur volume master (kedua channel)
- *   - Tombol Kembali ke scene sebelumnya
+ * Features:
+ *   - Toggle MUSIC (BGM + ambient) — separate on/off
+ *   - Toggle SOUND EFFECTS (SFX: coin, jump, enemies, etc.) — on/off
+ *   - VOLUME slider (0-100%) — controls master volume (both channels)
+ *   - Back button to previous scene
  *
- * Settings disimpan ke localStorage agar persisten antar sesi.
+ * Settings saved to localStorage for persistence across sessions.
  * Format: { bgmEnabled, sfxEnabled, volume }
  * ---------------------------------------------------------------
  */

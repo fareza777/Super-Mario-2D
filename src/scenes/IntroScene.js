@@ -1,9 +1,9 @@
 /**
  * src/scenes/IntroScene.js
  * ---------------------------------------------------------------
- * GrimPass — Layar judul. Menampilkan nama game "GRIMPASS" dan
- * tombol Mulai / Pilih Level. Latar bintang-bintang gelap
- * dengan atmosfer death/rebirth.
+ * GrimPass — Title screen. Shows the game name "GRIMPASS" and
+ * Start / Select Level buttons. Dark starfield background
+ * with death/rebirth atmosphere.
  * ---------------------------------------------------------------
  */
 import { story } from '../data/story.js';

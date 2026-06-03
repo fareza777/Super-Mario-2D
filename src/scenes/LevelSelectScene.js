@@ -1,9 +1,9 @@
 /**
  * src/scenes/LevelSelectScene.js
  * ---------------------------------------------------------------
- * Menu pilih level. Mendukung 100 level (Fase 3) dengan scroll
- * (mouse wheel). Status "selesai" dan skor terbaik dibaca dari
- * LevelManager (localStorage).
+ * Level selection menu. Supports 100 levels with scroll
+ * (mouse wheel + touch drag). Cleared status and best score
+ * are read from LevelManager (localStorage).
  * ---------------------------------------------------------------
  */
 import { levels } from '../data/levels.js';

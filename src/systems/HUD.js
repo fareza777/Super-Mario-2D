@@ -1,9 +1,11 @@
 /**
  * src/systems/HUD.js
  * ---------------------------------------------------------------
- * Heads-Up Display: nyawa, skor, level, timer, koin.
- * v13: panel rounded dengan border hijau, layout 2-kolom,
- *      icon Unicode berwarna (♥ ★ ⏱ ◉), font tebal dengan stroke.
+ * Heads-Up Display: lives, score, level, timer, orbs.
+ * v13: rounded panel with green border, 2-column layout,
+ *      colored Unicode icons (♥ ✦ ⏱ ✧), bold font with stroke.
+ * v17: dark theme (purple/cyan) for GrimPass.
+ * v19: English labels.
  * ---------------------------------------------------------------
  */
 export default class HUD {

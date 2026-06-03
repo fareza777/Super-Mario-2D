@@ -1,10 +1,10 @@
 /**
  * src/scenes/CutScene.js
  * ---------------------------------------------------------------
- * GrimPass — Cutscene cerita. Ditampilkan setelah level 10, 20,
- * ..., 90 (sebelum masuk level berikutnya). Data cerita dari
- * story.js. Tema visual: latar gelap dengan kabut ungu dan
- * teks berwarna cyan/ungu.
+ * GrimPass — Story cutscene. Displayed after levels 10, 20,
+ * ..., 90 (before entering the next level). Story data from
+ * story.js. Visual theme: dark background with purple fog and
+ * cyan/purple text.
  * ---------------------------------------------------------------
  */
 import { music } from '../systems/MusicManager.js';

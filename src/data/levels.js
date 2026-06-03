@@ -1,14 +1,14 @@
 ﻿/**
  * src/data/levels.js
  * ---------------------------------------------------------------
- * Menggabungkan 8 level hardcoded (Fase 2) dengan 92 level
- * hasil generator prosedural (Fase 3), total 100 level.
+ * Combines 8 handcrafted levels with 92 procedurally
+ * generated levels, total 100 levels.
  *
- * Level 1-8  : handcrafted, dengan nama tema (mis. "Hutan Hijau")
- * Level 9-100: di-generate dengan seed deterministik
+ * Level 1-8  : handcrafted, with theme names
+ * Level 9-100: generated with deterministic seed
  *              (Phaser.Math.RandomDataGenerator)
  *
- * Struktur level (sama untuk manual & generated):
+ * Level structure (same for manual & generated):
  *   id, name, world, player, platforms, coins, enemies, powerUps, goal
  * ---------------------------------------------------------------
  */
