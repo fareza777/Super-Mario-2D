@@ -148,8 +148,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createBackground() {
-    // v12: background isi seluruh camera view (600x800). Sisa 200px
-    // di bawah world (worldHeight=600) diisi sky color yang sama.
+    // v15: world 800px, background isi seluruh camera view (600x800).
+    // Level content tersebar di y=0..800, jadi tidak ada gap.
     this.add.rectangle(0, 0, this.cameras.main.width, 800, 0x87CEEB)
       .setOrigin(0, 0).setScrollFactor(0);
   }

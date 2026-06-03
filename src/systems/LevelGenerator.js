@@ -33,15 +33,15 @@ export default class LevelGenerator {
     // ----- platform melayang -----
     const platformCount = 8 + Math.floor(rng.frac() * 7); // 8-14
     const platforms = [
-      { x: 0, y: 568, width: worldWidth, height: 32 } // ground
+      { x: 0, y: 768, width: worldWidth, height: 32 } // ground (v15: 800px world)
     ];
 
     for (let i = 0; i < platformCount; i++) {
       const baseX = 200 + (i * (worldWidth - 400) / platformCount);
       const xJitter = rng.integerInRange(-40, 40);
       const x = Math.max(180, Math.min(worldWidth - 250, Math.floor(baseX + xJitter)));
-      // asumsi: y platform 320-480 (semakin tinggi kesulitan, semakin tinggi)
-      const y = 320 + Math.floor(rng.frac() * 160);
+      // v15: y platform 520-680 (sebar di 800px world, 200px sky di atas)
+      const y = 520 + Math.floor(rng.frac() * 160);
       const w = 96 + Math.floor(rng.frac() * 96); // 96-192
       const breakable = difficulty >= 4 && rng.frac() < 0.25;
       platforms.push({ x, y, width: w, height: 20, breakable });
@@ -54,12 +54,11 @@ export default class LevelGenerator {
 
     for (let i = 0; i < enemyCount; i++) {
       const x = 400 + Math.floor(rng.frac() * (worldWidth - 800));
-      // asumsi: flying enemy muncul mulai difficulty 3 (level 21+)
       const isFly = difficulty >= 3 && rng.frac() < 0.3;
       if (isFly) {
         enemies.push({
           x,
-          y: 280 + Math.floor(rng.frac() * 200),
+          y: 480 + Math.floor(rng.frac() * 200),  // v15: 480-680
           type: 'flying',
           speed: 40 + difficulty * 5,
           range: 50 + Math.floor(rng.frac() * 60),
@@ -68,7 +67,7 @@ export default class LevelGenerator {
       } else {
         enemies.push({
           x,
-          y: 536,
+          y: 736,  // v15: patrol di ground (768 - 32)
           type: 'patrol',
           speed: 60 + Math.floor(rng.frac() * 30) + difficulty * 3,
           patrolRange: 100 + Math.floor(rng.frac() * 100) + difficulty * 5
@@ -105,13 +104,13 @@ export default class LevelGenerator {
     return {
       id: levelNumber,
       name: 'Dunia ' + worldNum + ' - ' + inWorld,
-      world: { width: worldWidth, height: 600 },
-      player: { x: 60, y: 450 },
+      world: { width: worldWidth, height: 800 },  // v15: 800px world
+      player: { x: 60, y: 650 },  // v15: mulai di area game (bukan di langit)
       platforms,
       coins,
       enemies,
       powerUps,
-      goal: { x: worldWidth - 120, y: 568 }
+      goal: { x: worldWidth - 120, y: 768 }  // v15: goal di ground
     };
   }
 }
