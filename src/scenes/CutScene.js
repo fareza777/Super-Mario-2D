@@ -1,8 +1,10 @@
 /**
  * src/scenes/CutScene.js
  * ---------------------------------------------------------------
- * Cutscene cerita. Ditampilkan setelah level 10, 20, ..., 90
- * (sebelum masuk level berikutnya). Data cerita dari story.js.
+ * GrimPass — Cutscene cerita. Ditampilkan setelah level 10, 20,
+ * ..., 90 (sebelum masuk level berikutnya). Data cerita dari
+ * story.js. Tema visual: latar gelap dengan kabut ungu dan
+ * teks berwarna cyan/ungu.
  * ---------------------------------------------------------------
  */
 import { music } from '../systems/MusicManager.js';
@@ -19,70 +21,82 @@ export default class CutScene extends Phaser.Scene {
   }
 
   create() {
-    // v11: BGM calm untuk cutscene
     music.playBGM('calm');
     music.stopWind();
     this.events.once('shutdown', () => music.stopBGM());
 
-    this.cameras.main.setBackgroundColor('#0d1b2a');
+    // latar gelap
+    this.cameras.main.setBackgroundColor('#0d001a');
 
     // dekorasi bintang
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 35; i++) {
       const x = Phaser.Math.Between(0, 600);
       const y = Phaser.Math.Between(0, 800);
-      const s = this.add.circle(x, y, 2, 0xffffff, 0.6);
+      const isPurple = Phaser.Math.Between(0, 1) === 0;
+      const s = this.add.circle(x, y, 1.5, isPurple ? 0xce93d8 : 0x80deea, 0.6);
       this.tweens.add({
         targets: s,
-        alpha: 0.2,
-        duration: Phaser.Math.Between(1000, 2500),
+        alpha: 0.15,
+        duration: Phaser.Math.Between(1200, 2800),
         yoyo: true,
         repeat: -1
       });
     }
 
-    this.add.text(300, 100, 'DUNIA ' + Math.ceil(this.levelNumber / 10), {
-      fontSize: '44px',
-      color: '#ffeb3b',
+    // kabut ungu bawah
+    const fog = this.add.graphics();
+    fog.fillStyle(0x4a148c, 0.2);
+    fog.fillEllipse(300, 760, 800, 220);
+
+    this.add.text(300, 110, 'BAB ' + Math.ceil(this.levelNumber / 10), {
+      fontSize: '28px',
+      color: '#80deea',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
-      strokeThickness: 5
+      strokeThickness: 4
     }).setOrigin(0.5);
 
     if (this.cutscene) {
       this.add.text(300, 180, this.cutscene.title, {
-        fontSize: '28px',
-        color: '#ff8080',
+        fontSize: '32px',
+        color: '#ce93d8',
         fontFamily: 'Arial',
+        fontStyle: 'bold',
         stroke: '#000',
-        strokeThickness: 3
+        strokeThickness: 4
       }).setOrigin(0.5);
 
-      this.add.text(300, 400, this.cutscene.text, {
-        fontSize: '20px',
-        color: '#ffffff',
+      this.add.text(300, 380, this.cutscene.text, {
+        fontSize: '17px',
+        color: '#e0e0e0',
         fontFamily: 'Arial',
         align: 'center',
-        wordWrap: { width: 700 }
+        wordWrap: { width: 540 },
+        lineSpacing: 6
       }).setOrigin(0.5);
     } else {
-      this.add.text(300, 400, 'Lanjut ke level berikutnya...', {
+      this.add.text(300, 380, 'Melanjutkan perjalanan...', {
         fontSize: '20px',
-        color: '#ffffff',
-        fontFamily: 'Arial'
+        color: '#b0bec5',
+        fontFamily: 'Arial',
+        fontStyle: 'italic'
       }).setOrigin(0.5);
     }
 
-    const btn = this.add.rectangle(300, 680, 200, 50, 0x4caf50)
-      .setStrokeStyle(2, 0xffffff).setInteractive({ useHandCursor: true });
+    // panel untuk tombol
+    const btn = this.add.rectangle(300, 680, 220, 52, 0x311b92)
+      .setStrokeStyle(2, 0xce93d8, 0.7).setInteractive({ useHandCursor: true });
     this.add.text(300, 680, 'Lanjut', {
       fontSize: '24px',
-      color: '#ffffff',
+      color: '#e0e0e0',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5);
     btn.on('pointerdown', () => this.scene.start('GameScene', { level: this.nextLevel }));
-    btn.on('pointerover', () => btn.setFillStyle(0x66bb6a));
-    btn.on('pointerout', () => btn.setFillStyle(0x4caf50));
+    btn.on('pointerover', () => btn.setFillStyle(0x4527a0));
+    btn.on('pointerout', () => btn.setFillStyle(0x311b92));
   }
 }

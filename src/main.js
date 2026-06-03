@@ -1,7 +1,7 @@
 /**
  * src/main.js
  * ---------------------------------------------------------------
- * Entry point untuk game Platformer Mario.
+ * Entry point untuk game GrimPass (dark fantasy platformer 100 level).
  * Menginisialisasi Phaser.Game dan mendaftarkan semua scene:
  *   Boot -> Preload -> Intro -> LevelSelect -> Game
  *           Game -> CutScene -> Game (untuk level 10,20,...,90)
@@ -9,6 +9,8 @@
  *
  * v12: canvas 3:4 portrait (600x800). Scale.FIT responsive.
  *      Level world tetap 800x600 (kamera scroll horizontal).
+ * v13: HEIGHT_CONTROLS_WIDTH supaya canvas full-tinggi.
+ * v17: Rebrand ke GrimPass (tema gelap).
  * ---------------------------------------------------------------
  */
 import BootScene from './scenes/BootScene.js';
@@ -23,7 +25,7 @@ import SettingsScene from './scenes/SettingsScene.js';
 const config = {
   type: Phaser.AUTO,
   parent: 'game-container',
-  backgroundColor: '#87CEEB',
+  backgroundColor: '#0d001a',
   pixelArt: true,
   scale: {
     // v13: HEIGHT_CONTROLS_WIDTH supaya canvas mengisi penuh

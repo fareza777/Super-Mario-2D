@@ -101,16 +101,30 @@ export default class LevelGenerator {
       });
     }
 
+    // GrimPass: nama dunia bertema dark fantasy
+    const WORLD_NAMES = [
+      "Batas Dunia",
+      "Jejak yang Terlupakan",
+      "Jurang",
+      "Taman Tulang",
+      "Reruntuhan Terkutuk",
+      "Wilayah Bayangan",
+      "Puncak Terkutuk",
+      "Laut Jiwa",
+      "Kekosongan",
+      "GrimPass"
+    ];
+
     return {
       id: levelNumber,
-      name: 'Dunia ' + worldNum + ' - ' + inWorld,
-      world: { width: worldWidth, height: 800 },  // v15: 800px world
-      player: { x: 60, y: 650 },  // v15: mulai di area game (bukan di langit)
+      name: WORLD_NAMES[worldNum - 1] + ' - ' + inWorld,
+      world: { width: worldWidth, height: 800 },
+      player: { x: 60, y: 650 },
       platforms,
       coins,
       enemies,
       powerUps,
-      goal: { x: worldWidth - 120, y: 768 }  // v15: goal di ground
+      goal: { x: worldWidth - 120, y: 768 }
     };
   }
 }

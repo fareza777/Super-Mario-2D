@@ -148,10 +148,28 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createBackground() {
-    // v15: world 800px, background isi seluruh camera view (600x800).
-    // Level content tersebar di y=0..800, jadi tidak ada gap.
-    this.add.rectangle(0, 0, this.cameras.main.width, 800, 0x87CEEB)
-      .setOrigin(0, 0).setScrollFactor(0);
+    // GrimPass: latar langit gelap gradasi ungu-hitam
+    const W = this.cameras.main.width;
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x0d001a, 0x0d001a, 0x1a0033, 0x1a0033, 1);
+    bg.fillRect(0, 0, W, 800);
+    bg.setScrollFactor(0);
+
+    // bintang berkelip (banyak)
+    for (let i = 0; i < 25; i++) {
+      const x = Phaser.Math.Between(0, 2400);
+      const y = Phaser.Math.Between(0, 300);
+      const isPurple = Phaser.Math.Between(0, 1) === 0;
+      const s = this.add.circle(x, y, 1, isPurple ? 0xce93d8 : 0x80deea, 0.6);
+      s.setScrollFactor(0.3);
+      this.tweens.add({
+        targets: s,
+        alpha: 0.1,
+        duration: Phaser.Math.Between(1500, 3500),
+        yoyo: true,
+        repeat: -1
+      });
+    }
   }
 
   createPlatforms(platforms) {
@@ -313,27 +331,27 @@ export default class GameScene extends Phaser.Scene {
     this.physics.world.pause();
     this.time.paused = true;
 
-    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 480), 220, 0x000000, 0.82)
-      .setScrollFactor(0).setDepth(300);
+    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 480), 220, 0x0d001a, 0.88)
+      .setScrollFactor(0).setDepth(300).setStrokeStyle(2, 0x7c4dff, 0.6);
     const title = this.add.text(cx, cy - 70, 'Kembali ke Menu?', {
       fontSize: (isMobile ? 22 : 26) + 'px',
-      color: '#ffeb3b',
+      color: '#ce93d8',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(301);
-    const sub = this.add.text(cx, cy - 35, 'Progress level ini akan hilang.', {
+    const sub = this.add.text(cx, cy - 35, 'Progress tingkat ini akan hilang.', {
       fontSize: '14px',
-      color: '#cccccc',
+      color: '#9fa8da',
       fontFamily: 'Arial',
       stroke: '#000',
       strokeThickness: 2
     }).setOrigin(0.5).setScrollFactor(0).setDepth(301);
 
-    // Tombol Ya
-    const yaBtn = this.add.rectangle(cx - 70, cy + 30, 120, 48, 0x4caf50)
-      .setStrokeStyle(2, 0xffffff, 0.5)
+    // Tombol Ya — ungu
+    const yaBtn = this.add.rectangle(cx - 70, cy + 30, 120, 48, 0x4527a0)
+      .setStrokeStyle(2, 0xce93d8, 0.7)
       .setScrollFactor(0).setDepth(301).setInteractive({ useHandCursor: true });
     const yaTxt = this.add.text(cx - 70, cy + 30, 'YA', {
       fontSize: '20px', color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
@@ -663,25 +681,25 @@ export default class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const W = cam.width;
     const H = cam.height;
-    const cx = W / 2;  // SCREEN center, bukan world
+    const cx = W / 2;
     const cy = H / 2;
     const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    // Overlay — INTERACTIVE, klik di area kosong juga advance
+    // Overlay — INTERACTIVE
     const overlayW = Math.min(W - 40, 620);
     const overlayH = Math.min(H - 40, 420);
-    const overlay = this.add.rectangle(cx, cy, overlayW, overlayH, 0x000000, 0.78)
+    const overlay = this.add.rectangle(cx, cy, overlayW, overlayH, 0x0d001a, 0.85)
       .setScrollFactor(0).setDepth(99)
+      .setStrokeStyle(2, 0x7c4dff, 0.5)
       .setInteractive({ useHandCursor: true });
     overlay.on('pointerdown', () => {
-      console.log('[GameScene v6] overlay click -> advance');
       if (this.gameState === 'won') this.advanceToNext();
     });
 
-    const titleSize = isMobile ? 30 : 36;
-    this.add.text(cx, cy - (isMobile ? 150 : 160), 'LEVEL ' + this.currentLevel + ' SELESAI!', {
+    const titleSize = isMobile ? 28 : 34;
+    this.add.text(cx, cy - (isMobile ? 150 : 160), 'TINGKAT ' + this.currentLevel + ' TERLEWATI', {
       fontSize: titleSize + 'px',
-      color: '#ffeb3b',
+      color: '#ce93d8',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
@@ -690,67 +708,67 @@ export default class GameScene extends Phaser.Scene {
 
     this.add.text(cx, cy - (isMobile ? 110 : 115), 'Skor: ' + this.score + '   Waktu: ' + this.formatTime(this.elapsedTime), {
       fontSize: (isMobile ? 17 : 20) + 'px',
-      color: '#ffffff',
+      color: '#80deea',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    // ====== Tombol "LANJUT" BESAR (mobile-friendly) ======
+    // ====== Tombol "LANJUT" (mobile-friendly) ======
     let label;
     if (this.currentLevel === 100) {
-      label = 'Lanjut ke Ending';
+      label = 'Lanjut ke Penutup';
     } else if (this.currentLevel % 10 === 0) {
-      label = 'Lanjut (Cutscene)';
+      label = 'Lanjut (Cerita)';
     } else {
-      label = 'Lanjut Level ' + (this.currentLevel + 1);
+      label = 'Lanjut Tingkat ' + (this.currentLevel + 1);
     }
 
     const lanjutBtnY = isMobile ? cy - 50 : cy - 40;
     const lanjutBtnW = isMobile ? W - 80 : 320;
     const lanjutBtnH = isMobile ? 70 : 60;
-    const lanjutBtn = this.add.rectangle(cx, lanjutBtnY, lanjutBtnW, lanjutBtnH, 0x4caf50)
+    const lanjutBtn = this.add.rectangle(cx, lanjutBtnY, lanjutBtnW, lanjutBtnH, 0x4527a0)
       .setScrollFactor(0).setDepth(101)
-      .setStrokeStyle(4, 0xffffff, 0.7)
+      .setStrokeStyle(3, 0xce93d8, 0.8)
       .setInteractive({ useHandCursor: true });
     const lanjutTxt = this.add.text(cx, lanjutBtnY, label, {
-      fontSize: (isMobile ? 22 : 22) + 'px',
-      color: '#ffffff',
+      fontSize: (isMobile ? 20 : 22) + 'px',
+      color: '#e0e0e0',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
     lanjutBtn.on('pointerdown', () => {
-      console.log('[GameScene v6] lanjut button click');
       if (this.gameState === 'won') this.advanceToNext();
     });
-    lanjutBtn.on('pointerover', () => lanjutBtn.setFillStyle(0x66bb6a));
-    lanjutBtn.on('pointerout', () => lanjutBtn.setFillStyle(0x4caf50));
+    lanjutBtn.on('pointerover', () => lanjutBtn.setFillStyle(0x5e35b1));
+    lanjutBtn.on('pointerout', () => lanjutBtn.setFillStyle(0x4527a0));
 
-    // Tombol Ulangi & Menu (lebih kecil, di bawah)
+    // Tombol Ulangi & Menu
     const otherBtnY = isMobile ? lanjutBtnY + 60 : lanjutBtnY + 55;
-    this.makeMenuButton(cx, otherBtnY, 'Ulangi Level', () => {
+    this.makeMenuButton(cx, otherBtnY, 'Ulangi Tingkat', () => {
       this.cancelAutoAdvance();
       this.scene.start('GameScene', { level: this.currentLevel });
     }, 100);
-    this.makeMenuButton(cx, otherBtnY + 45, 'Menu Level', () => {
+    this.makeMenuButton(cx, otherBtnY + 45, 'Menu Tingkat', () => {
       this.cancelAutoAdvance();
       this.scene.start('LevelSelectScene');
     }, 100);
 
-    // Hint text di bawah
+    // Hint
     const hintY = otherBtnY + 95;
     const hintText = isMobile
-      ? 'TAP TOMBOL HIJAU UNTUK LANJUT'
+      ? 'KETUK TOMBOL UNTUK MELANJUTKAN'
       : 'TEKAN SPACE / ENTER  atau  KLIK TOMBOL';
     const hint = this.add.text(cx, hintY, hintText, {
-      fontSize: (isMobile ? 14 : 16) + 'px',
-      color: '#ffeb3b',
+      fontSize: (isMobile ? 12 : 14) + 'px',
+      color: '#ce93d8',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
-      strokeThickness: 3
+      strokeThickness: 2
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
     this.tweens.add({
       targets: hint,
@@ -760,7 +778,6 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1
     });
 
-    // Auto-advance 8 detik (safety net untuk mobile)
     this.startAutoAdvance(8);
   }
 
@@ -836,15 +853,14 @@ export default class GameScene extends Phaser.Scene {
     const cy = H / 2;
     const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    // v14: overlay lebih besar & tombol lebih jelas. INTERACTIVE
-    // supaya klik di area kosong tetap bisa "menu" (safety net).
+    // v17: overlay tema gelap GrimPass (ungu/merah)
     const ovW = Math.min(W - 40, 560);
     const ovH = Math.min(H - 40, 380);
-    const ov = this.add.rectangle(cx, cy, ovW, ovH, 0x000000, 0.82)
+    const ov = this.add.rectangle(cx, cy, ovW, ovH, 0x0d001a, 0.88)
       .setScrollFactor(0).setDepth(99)
-      .setStrokeStyle(3, 0xff5252, 0.6);
+      .setStrokeStyle(3, 0xff5252, 0.7);
 
-    this.add.text(cx, cy - (isMobile ? 130 : 145), 'GAME OVER', {
+    this.add.text(cx, cy - (isMobile ? 130 : 145), 'JIWA PADAM', {
       fontSize: (isMobile ? 40 : 52) + 'px',
       color: '#ff5252',
       fontFamily: 'Arial',
@@ -855,24 +871,25 @@ export default class GameScene extends Phaser.Scene {
 
     this.add.text(cx, cy - (isMobile ? 85 : 95), 'Skor: ' + this.score, {
       fontSize: (isMobile ? 18 : 22) + 'px',
-      color: '#ffffff',
+      color: '#80deea',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
 
-    // v14: tombol lebih besar & jelas. 3 opsi: retry, ulangi, menu
+    // v17: tombol lebih besar & jelas. 3 opsi: lanjut, ulangi, menu
     const btnW = isMobile ? W - 80 : 280;
     const btnH = isMobile ? 52 : 48;
     const gap = isMobile ? 8 : 10;
     const startY = cy - (isMobile ? 30 : 30);
 
-    // Retry level dengan 1 nyawa (continue)
-    const retry = this.add.rectangle(cx, startY, btnW, btnH, 0x4caf50)
+    // Lanjut (1 jiwa) — ungu
+    const retry = this.add.rectangle(cx, startY, btnW, btnH, 0x4527a0)
       .setScrollFactor(0).setDepth(101)
-      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setStrokeStyle(3, 0xce93d8, 0.7)
       .setInteractive({ useHandCursor: true });
-    this.add.text(cx, startY, 'LANJUT (+1 NYAWA)', {
+    this.add.text(cx, startY, 'LANJUT (+1 JIWA)', {
       fontSize: (isMobile ? 18 : 18) + 'px',
       color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
       stroke: '#000', strokeThickness: 3
@@ -883,15 +900,15 @@ export default class GameScene extends Phaser.Scene {
       this.hud.setLives(this.lives);
       this.scene.start('GameScene', { level: this.currentLevel });
     });
-    retry.on('pointerover', () => retry.setFillStyle(0x66bb6a));
-    retry.on('pointerout', () => retry.setFillStyle(0x4caf50));
+    retry.on('pointerover', () => retry.setFillStyle(0x5e35b1));
+    retry.on('pointerout', () => retry.setFillStyle(0x4527a0));
 
-    // Ulangi dari awal (5 nyawa)
-    const restart = this.add.rectangle(cx, startY + btnH + gap, btnW, btnH, 0x2196f3)
+    // Ulangi dari 0 (5 jiwa) — cyan
+    const restart = this.add.rectangle(cx, startY + btnH + gap, btnW, btnH, 0x00838f)
       .setScrollFactor(0).setDepth(101)
-      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setStrokeStyle(3, 0x80deea, 0.7)
       .setInteractive({ useHandCursor: true });
-    this.add.text(cx, startY + btnH + gap, 'ULANGI DARI 0 (5 NYAWA)', {
+    this.add.text(cx, startY + btnH + gap, 'ULANGI DARI 0 (5 JIWA)', {
       fontSize: (isMobile ? 18 : 18) + 'px',
       color: '#ffffff', fontFamily: 'Arial', fontStyle: 'bold',
       stroke: '#000', strokeThickness: 3
@@ -901,13 +918,13 @@ export default class GameScene extends Phaser.Scene {
       this.lives = 5;
       this.scene.start('GameScene', { level: this.currentLevel });
     });
-    restart.on('pointerover', () => restart.setFillStyle(0x42a5f5));
-    restart.on('pointerout', () => restart.setFillStyle(0x2196f3));
+    restart.on('pointerover', () => restart.setFillStyle(0x00acc1));
+    restart.on('pointerout', () => restart.setFillStyle(0x00838f));
 
-    // Menu (paling menonjol, warna oranye)
-    const menu = this.add.rectangle(cx, startY + 2 * (btnH + gap), btnW, btnH, 0xff9800)
+    // Menu — merah marun
+    const menu = this.add.rectangle(cx, startY + 2 * (btnH + gap), btnW, btnH, 0xb71c1c)
       .setScrollFactor(0).setDepth(101)
-      .setStrokeStyle(3, 0xffffff, 0.6)
+      .setStrokeStyle(3, 0xff8a80, 0.7)
       .setInteractive({ useHandCursor: true });
     this.add.text(cx, startY + 2 * (btnH + gap), 'KEMBALI KE MENU', {
       fontSize: (isMobile ? 18 : 18) + 'px',
@@ -918,8 +935,8 @@ export default class GameScene extends Phaser.Scene {
       sound.play('click');
       this.scene.start('LevelSelectScene');
     });
-    menu.on('pointerover', () => menu.setFillStyle(0xffb74d));
-    menu.on('pointerout', () => menu.setFillStyle(0xff9800));
+    menu.on('pointerover', () => menu.setFillStyle(0xd32f2f));
+    menu.on('pointerout', () => menu.setFillStyle(0xb71c1c));
   }
 
   togglePause() {
@@ -955,11 +972,11 @@ export default class GameScene extends Phaser.Scene {
     const cy = H / 2;
     const isMobile = W < 600 || this.sys.game.device.input.touch;
 
-    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 560), Math.min(H - 40, 340), 0x000000, 0.75)
-      .setScrollFactor(0).setDepth(200);
-    const title = this.add.text(cx, cy - (isMobile ? 110 : 120), 'PAUSE', {
+    const bg = this.add.rectangle(cx, cy, Math.min(W - 40, 560), Math.min(H - 40, 340), 0x0d001a, 0.85)
+      .setScrollFactor(0).setDepth(200).setStrokeStyle(2, 0x7c4dff, 0.5);
+    const title = this.add.text(cx, cy - (isMobile ? 110 : 120), 'JEDA', {
       fontSize: (isMobile ? 40 : 52) + 'px',
-      color: '#ffeb3b',
+      color: '#ce93d8',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
@@ -986,12 +1003,15 @@ export default class GameScene extends Phaser.Scene {
 
   makeMenuButton(cx, y, label, callback, depth) {
     const d = depth || 100;
-    const btn = this.add.rectangle(cx, y, 220, 44, 0x2196f3)
-      .setScrollFactor(0).setDepth(d).setInteractive({ useHandCursor: true });
+    const btn = this.add.rectangle(cx, y, 220, 44, 0x4527a0)
+      .setScrollFactor(0).setDepth(d)
+      .setStrokeStyle(2, 0xce93d8, 0.6)
+      .setInteractive({ useHandCursor: true });
     const txt = this.add.text(cx, y, label, {
       fontSize: '19px',
       color: '#ffffff',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 2
     }).setOrigin(0.5).setScrollFactor(0).setDepth(d + 1);
@@ -999,8 +1019,8 @@ export default class GameScene extends Phaser.Scene {
       sound.play('click');
       callback();
     });
-    btn.on('pointerover', () => btn.setFillStyle(0x42a5f5));
-    btn.on('pointerout', () => btn.setFillStyle(0x2196f3));
+    btn.on('pointerover', () => btn.setFillStyle(0x5e35b1));
+    btn.on('pointerout', () => btn.setFillStyle(0x4527a0));
   }
 
   formatTime(ms) {

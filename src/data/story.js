@@ -1,73 +1,67 @@
 /**
  * src/data/story.js
  * ---------------------------------------------------------------
- * Data cerita untuk intro, cutscene per dunia (setelah level
- * 10, 20, ..., 90), dan ending (setelah level 100).
- * Semua teks dalam Bahasa Indonesia.
+ * GrimPass — Narasi dan cerita untuk cutscene.
+ *
+ * Premis: Pemain adalah "Soul Wanderer", arwah yang terperangkap
+ * di antara dunia hidup dan alam baka. Untuk menemukan kedamaian,
+ * mereka harus melewati GrimPass — wilayah berbahaya yang
+ * dihuni bayangan, wraith, dan jiwa-jiwa yang hilang.
+ *
+ * Ada 9 cutscene (setelah level 10, 20, ..., 90) dan satu
+ * penutup setelah level 100.
  * ---------------------------------------------------------------
  */
-export const story = {
-  intro: 'Selamat datang di Petualangan Mario! Bantulah Mario menyelamatkan Putri dari cengkeraman Raja Bowser di 100 level yang menantang!',
 
-  cutscenes: [
-    {
-      afterLevel: 10,
-      title: 'Akhir Dunia 1',
-      text: 'Mario berhasil melewati Hutan Hijau. Namun rintangan baru menantinya di dunia berikutnya. Awan gelap mulai menyelimuti cakrawala...'
-    },
-    {
-      afterLevel: 20,
-      title: 'Akhir Dunia 2',
-      text: 'Awan gelap menyelimuti dunia kedua. Musuh-musuh terbang berdatangan dari langit! Mario harus lebih waspada dalam setiap langkah.'
-    },
-    {
-      afterLevel: 30,
-      title: 'Akhir Dunia 3',
-      text: 'Mario menemukan petunjuk tentang lokasi Bowser. Tapi jalannya penuh jebakan dan musuh yang lebih kuat dari sebelumnya.'
-    },
-    {
-      afterLevel: 40,
-      title: 'Akhir Dunia 4',
-      text: 'Kastil gelap terlihat di cakrawala. Angin dingin berhembus. Mario merasa ini adalah tempat persembunyian Bowser selama ini.'
-    },
-    {
-      afterLevel: 50,
-      title: 'Setengah Perjalanan',
-      text: 'Setengah perjalanan telah dilalui! Mario beristirahat sejenak, tapi waktu tidak menunggu. Lanjutkan perjuangan, Mario!'
-    },
-    {
-      afterLevel: 60,
-      title: 'Akhir Dunia 6',
-      text: 'Lava dan api mulai muncul di sekitar Mario. Suhu udara semakin panas. Satu langkah salah, dan Mario akan jatuh ke dalam api!'
-    },
-    {
-      afterLevel: 70,
-      title: 'Akhir Dunia 7',
-      text: 'Bantuan ajaib datang dari langit! Jamur dan bintang jatuh untuk Mario. Gunakan dengan bijak di dunia yang penuh rintangan ini.'
-    },
-    {
-      afterLevel: 80,
-      title: 'Akhir Dunia 8',
-      text: 'Hampir sampai! Mario melihat menara Bowser di kejauhan. Tinggal sedikit lagi menuju pertarungan akhir. Kumpulkan semua kekuatan!'
-    },
-    {
-      afterLevel: 90,
-      title: 'Akhir Dunia 9',
-      text: 'Ksatria-ksatria Bowser menjaga jalan masuk. Mario harus berjuang habis-habisan untuk menembus pertahanan terakhir mereka.'
-    }
-  ],
+export const story = {
+  intro: 'Di ambang kehidupan dan kematian, tersesatlah sebuah jiwa.\nTanpa nama, tanpa tujuan, hanya lentera kecil yang tersisa.\nHadapilah kegelapan. Temukan jalan. Lewati GrimPass.',
 
   ending: {
-    title: 'TAMAT',
-    text: 'Selamat! Kamu telah menyelesaikan Petualangan Mario dan menyelamatkan Putri dari cengkeraman Bowser! Terima kasih telah bermain!'
+    title: 'KEDAMAIAN',
+    text: 'Lentera padam. Bayangan memudar. Setelah melewati\nsepuluh dunia kegelapan, Soul Wanderer akhirnya menemukan\nkedamaian yang dicari.\n\nNamun GrimPass tetap ada...\nmenanti jiwa berikutnya yang tersesat.'
   }
 };
 
-/**
- * Ambil data cutscene untuk level tertentu (multiple of 10).
- * @param {number} levelNumber
- * @returns {object|null}
- */
+// 9 cutscene — dipanggil setelah level 10, 20, 30, ..., 90
+const CUTSCENES = {
+  10: {
+    title: 'Batas Dunia',
+    text: 'Langkah pertama telah diambil. Bayangan berbisik\nnamamu — mereka mengenal kehadiranmu.\n\nJangan percaya pada suara yang memanggil dari belakang.'
+  },
+  20: {
+    title: 'Jejak yang Terlupakan',
+    text: 'Di sini, memori menghilang seperti daun di musim gugur.\nKamu bukan yang pertama melewati jalan ini.\n\nYang lain telah jatuh. Jangan jadi yang berikutnya.'
+  },
+  30: {
+    title: 'Jurang',
+    text: 'Dasar yang tak terlihat menatap balik. Jangan\nmenoleh ke bawah — Abyss menyukai rasa takut.\n\nTetaplah melangkah. Ke depan, bukan ke bawah.'
+  },
+  40: {
+    title: 'Taman Tulang',
+    text: 'Istirahatlah di sini, jika kau berani.\n\nYang mati tidak bangun. Namun mereka\nmendengar setiap napas yang kau ambil.'
+  },
+  50: {
+    title: 'Reruntuhan Terkutuk',
+    text: 'Bangunan kuno ini mengingat segalanya.\n\nKekuatan purba berdenyut di balik dinding\n yang retak. Jangan sentuh apapun yang bersinar.'
+  },
+  60: {
+    title: 'Wilayah Bayangan',
+    text: 'Cahaya adalah kenangan di sini.\nHanya lentera kecilmu yang bisa dipercaya.\n\nBayangan bukan musuh — mereka adalah teman\nyang lupa bentuknya.'
+  },
+  70: {
+    title: 'Puncak Terkutuk',
+    text: 'Puncak menguji semua yang mendaki.\n\nAngin membawa suara-suara dari masa lalu.\nSedikit yang mencapai puncak. Lebih sedikit lagi\nyang turun dengan waras.'
+  },
+  80: {
+    title: 'Laut Jiwa',
+    text: 'Laut Jiwa memanggil. Jutaan jiwa hilang\nberenang tanpa tujuan di bawah permukaan.\n\nApakah kamu akan menjawab panggilannya?\nAtau tetap di atas, di tepi?'
+  },
+  90: {
+    title: 'Kekosongan',
+    text: 'Kekosongan menunggu. Tidak ada kembali\ndari ketiadaan.\n\nSatu langkah lagi. Hanya satu.\nDan GrimPass akan terbuka.'
+  }
+};
+
 export function getCutsceneStory(levelNumber) {
-  return story.cutscenes.find(c => c.afterLevel === levelNumber) || null;
+  return CUTSCENES[levelNumber] || null;
 }

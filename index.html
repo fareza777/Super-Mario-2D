@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="theme-color" content="#0d001a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Petualangan Mario - 100 Level</title>
+  <title>GrimPass — 100 Level</title>
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -17,7 +17,7 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      background: #0a0a1a;
+      background: #050010;
       font-family: Arial, sans-serif;
       overscroll-behavior: none;
       touch-action: none;
@@ -38,16 +38,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      background: radial-gradient(ellipse at center top, #1a0033 0%, #050010 70%, #000000 100%);
       position: relative;
       overflow: hidden;
     }
     canvas {
       display: block;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 32px rgba(124, 77, 255, 0.35), 0 4px 24px rgba(0, 0, 0, 0.8);
       border-radius: 2px;
-      /* v13: biarkan Phaser HEIGHT_CONTROLS_WIDTH atur ukuran
-         canvas. max-width/height sebagai safety cap saja. */
     }
     /* Mobile: Phaser Scale.HEIGHT_CONTROLS_WIDTH isi penuh tinggi
        container. Sisi horizontal sedikit overflow (di-clip). */
@@ -283,6 +281,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <script type="module" src="src/main.js?v=16"></script>
+  <script type="module" src="src/main.js?v=17"></script>
 </body>
 </html>

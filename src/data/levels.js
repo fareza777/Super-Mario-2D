@@ -18,7 +18,7 @@ import LevelGenerator from '../systems/LevelGenerator.js';
 const manualLevels = [
   {
     id: 1,
-    name: 'Hutan Hijau',
+    name: 'Batas Dunia',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -48,7 +48,7 @@ const manualLevels = [
   },
   {
     id: 2,
-    name: 'Rumput Luas',
+    name: 'Jejak Sunyi',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -81,7 +81,7 @@ const manualLevels = [
   },
   {
     id: 3,
-    name: 'Koin Bertebaran',
+    name: 'Jiwa Tergusur',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -122,7 +122,7 @@ const manualLevels = [
   },
   {
     id: 4,
-    name: 'Langit Awal',
+    name: 'Senja yang Padam',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -155,7 +155,7 @@ const manualLevels = [
   },
   {
     id: 5,
-    name: 'Tangga Runtuh',
+    name: 'Tangga Retak',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -192,7 +192,7 @@ const manualLevels = [
   },
   {
     id: 6,
-    name: 'Awan Berbahaya',
+    name: 'Awan Beracun',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -227,7 +227,7 @@ const manualLevels = [
   },
   {
     id: 7,
-    name: 'Kehancuran Total',
+    name: 'Reruntuhan',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -267,7 +267,7 @@ const manualLevels = [
   },
   {
     id: 8,
-    name: 'Petualang Sejati',
+    name: 'Penjelajah Akhir',
     world: { width: 2400, height: 800 },
     player: { x: 60, y: 650 },
     platforms: [
@@ -319,4 +319,5 @@ for (let i = 9; i <= 100; i++) {
 }
 
 export const levels = [...manualLevels, ...generatedLevels];
+
 

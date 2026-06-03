@@ -1,6 +1,6 @@
 {
-  "appId": "id.web.mario.petualangan",
-  "appName": "Petualangan Mario",
+  "appId": "id.web.grimpass",
+  "appName": "GrimPass",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

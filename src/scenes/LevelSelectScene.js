@@ -24,23 +24,40 @@ export default class LevelSelectScene extends Phaser.Scene {
   }
 
   createBackground() {
-    this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x1a237e)
+    this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0d001a)
       .setOrigin(0, 0).setScrollFactor(0);
+
+    // dekorasi bintang
+    for (let i = 0; i < 30; i++) {
+      const x = Phaser.Math.Between(0, 600);
+      const y = Phaser.Math.Between(0, 800);
+      const isPurple = Phaser.Math.Between(0, 1) === 0;
+      const s = this.add.circle(x, y, 1.2, isPurple ? 0xce93d8 : 0x80deea, 0.5);
+      this.tweens.add({
+        targets: s,
+        alpha: 0.1,
+        duration: Phaser.Math.Between(1500, 3500),
+        yoyo: true,
+        repeat: -1
+      });
+    }
   }
 
   createTitle() {
     this.add.text(300, 50, 'PILIH LEVEL', {
       fontSize: '40px',
-      color: '#ffeb3b',
+      color: '#ce93d8',
       fontFamily: 'Arial',
+      fontStyle: 'bold',
       stroke: '#000',
       strokeThickness: 5
     }).setOrigin(0.5);
 
-    this.add.text(300, 92, 'Petualangan Mario - 100 Level', {
-      fontSize: '16px',
-      color: '#ffffff',
-      fontFamily: 'Arial'
+    this.add.text(300, 92, 'GrimPass — 100 Level', {
+      fontSize: '14px',
+      color: '#9fa8da',
+      fontFamily: 'Arial',
+      fontStyle: 'italic'
     }).setOrigin(0.5);
   }
 
@@ -53,39 +70,42 @@ export default class LevelSelectScene extends Phaser.Scene {
       const y = startY + i * itemHeight;
       const completed = LevelManager.isCompleted(level.id);
       const bestScore = LevelManager.getBestScore(level.id);
-      const color = completed ? 0x2e7d32 : 0x1565c0;
+      // warna: completed = ungu, belum = abu gelap
+      const color = completed ? 0x4527a0 : 0x263238;
 
       const rect = this.add.rectangle(300, y, 500, 40, color);
-      rect.setStrokeStyle(2, 0xffffff, 0.3);
+      rect.setStrokeStyle(1.5, 0xce93d8, 0.25);
       rect.setInteractive({ useHandCursor: true });
 
       const numText = this.add.text(120, y, String(level.id).padStart(3, '0'), {
         fontSize: '18px',
-        color: '#ffffff',
+        color: '#80deea',
         fontFamily: 'Arial',
+        fontStyle: 'bold',
         stroke: '#000',
         strokeThickness: 3
       }).setOrigin(0.5);
 
       const nameText = this.add.text(150, y, level.name, {
-        fontSize: '17px',
-        color: '#ffffff',
+        fontSize: '15px',
+        color: '#e0e0e0',
         fontFamily: 'Arial',
         stroke: '#000',
-        strokeThickness: 3
+        strokeThickness: 2
       }).setOrigin(0, 0.5);
 
-      const statusText = completed ? ('Selesai  ' + bestScore) : 'Belum';
+      const statusText = completed ? ('Selesai  ✦' + bestScore) : 'Belum';
       const statusTxt = this.add.text(560, y, statusText, {
-        fontSize: '14px',
-        color: completed ? '#ffeb3b' : '#cccccc',
+        fontSize: '13px',
+        color: completed ? '#ce93d8' : '#78909c',
         fontFamily: 'Arial',
+        fontStyle: 'bold',
         stroke: '#000',
         strokeThickness: 2
       }).setOrigin(1, 0.5);
 
       rect.on('pointerdown', () => this.startLevel(level.id));
-      rect.on('pointerover', () => rect.setFillStyle(0x42a5f5));
+      rect.on('pointerover', () => rect.setFillStyle(0x4a148c));
       rect.on('pointerout', () => rect.setFillStyle(color));
 
       this.listContainer.add([rect, numText, nameText, statusTxt]);
@@ -134,11 +154,12 @@ export default class LevelSelectScene extends Phaser.Scene {
     const totalLevels = levels.length;
     const completedCount = LevelManager.getCompletedLevels().length;
     this.add.text(300, 760,
-      'Klik level untuk mulai  |  ' + completedCount + ' / ' + totalLevels + ' selesai',
+      'Ketuk level untuk masuk  |  ' + completedCount + ' / ' + totalLevels + ' terselesaikan',
       {
-        fontSize: '13px',
-        color: '#bbbbbb',
-        fontFamily: 'Arial'
+        fontSize: '12px',
+        color: '#9fa8da',
+        fontFamily: 'Arial',
+        fontStyle: 'italic'
       }
     ).setOrigin(0.5);
   }

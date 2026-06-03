@@ -1,8 +1,8 @@
 /**
  * src/scenes/SettingsScene.js
  * ---------------------------------------------------------------
- * v16: Menu pengaturan suara. Bisa diakses dari IntroScene,
- * LevelSelectScene, dan pause overlay GameScene.
+ * v17: Menu pengaturan suara GrimPass (tema gelap).
+ * Bisa diakses dari IntroScene, LevelSelectScene, dan pause.
  *
  * Fitur:
  *   - Toggle MUSIK (BGM + ambient wind) — on/off terpisah
@@ -17,7 +17,7 @@
 import { sound } from '../systems/SoundManager.js';
 import { music } from '../systems/MusicManager.js';
 
-const STORAGE_KEY = 'marioGameSettings';
+const STORAGE_KEY = 'grimPassSettings';
 
 function loadSettings() {
   try {
@@ -60,14 +60,15 @@ export default class SettingsScene extends Phaser.Scene {
     const cx = W / 2;
 
     // Latar
-    this.add.rectangle(0, 0, W, H, 0x1a1a2e)
+    this.add.rectangle(0, 0, W, H, 0x050010)
       .setOrigin(0, 0).setScrollFactor(0);
 
     // dekorasi bintang
     for (let i = 0; i < 30; i++) {
       const x = Phaser.Math.Between(0, W);
       const y = Phaser.Math.Between(0, H);
-      const s = this.add.circle(x, y, 1.5, 0xffffff, 0.5);
+      const isPurple = Phaser.Math.Between(0, 1) === 0;
+      const s = this.add.circle(x, y, 1.5, isPurple ? 0xce93d8 : 0x80deea, 0.5);
       this.tweens.add({
         targets: s,
         alpha: 0.15,
@@ -80,7 +81,7 @@ export default class SettingsScene extends Phaser.Scene {
     // ========== Judul ==========
     this.add.text(cx, 90, 'PENGATURAN', {
       fontSize: '40px',
-      color: '#ffeb3b',
+      color: '#ce93d8',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
@@ -89,8 +90,9 @@ export default class SettingsScene extends Phaser.Scene {
 
     this.add.text(cx, 130, 'Suara & Volume', {
       fontSize: '15px',
-      color: '#cccccc',
-      fontFamily: 'Arial'
+      color: '#9fa8da',
+      fontFamily: 'Arial',
+      fontStyle: 'italic'
     }).setOrigin(0.5);
 
     // ========== Muat settings tersimpan ==========
@@ -111,9 +113,9 @@ export default class SettingsScene extends Phaser.Scene {
     const panelY = 160;
 
     const panel = this.add.graphics();
-    panel.fillStyle(0x0d1b2a, 0.8);
+    panel.fillStyle(0x0d001a, 0.85);
     panel.fillRoundedRect(panelX, panelY, panelW, panelH, 14);
-    panel.lineStyle(1.5, 0x4caf50, 0.5);
+    panel.lineStyle(1.5, 0x7c4dff, 0.6);
     panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 14);
 
     // simpan posisi slider
@@ -169,7 +171,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     this.volumeLabel = this.add.text(panelX + panelW - 24, r3Y, Math.round(this.volume * 100) + '%', {
       fontSize: '18px',
-      color: '#ffeb3b',
+      color: '#80deea',
       fontFamily: 'Arial',
       fontStyle: 'bold',
       stroke: '#000',
@@ -178,7 +180,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Track slider
     const track = this.add.graphics();
-    track.fillStyle(0x333333, 1);
+    track.fillStyle(0x1a1a2e, 1);
     track.fillRoundedRect(this._sliderX, this._sliderY, this._sliderW, this._sliderH, 4);
 
     this.sliderFill = this.add.graphics();
@@ -188,7 +190,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.sliderHandle = this.add.circle(
       this._sliderX + this.volume * this._sliderW,
       this._sliderY + this._sliderH / 2,
-      handleR, 0xffeb3b
+      handleR, 0xce93d8
     ).setStrokeStyle(2, 0x000000);
     this.sliderHandle.setInteractive({ useHandCursor: true, draggable: true });
     this._drawSliderFill();
@@ -236,8 +238,8 @@ export default class SettingsScene extends Phaser.Scene {
 
     // ========== Tombol Simpan & Kembali ==========
     const btnY = panelY + panelH + 35;
-    const btn = this.add.rectangle(cx, btnY, 220, 48, 0x4caf50)
-      .setStrokeStyle(3, 0xffffff, 0.6)
+    const btn = this.add.rectangle(cx, btnY, 220, 48, 0x4527a0)
+      .setStrokeStyle(3, 0xce93d8, 0.7)
       .setInteractive({ useHandCursor: true });
     this.add.text(cx, btnY, 'SIMPAN & KEMBALI', {
       fontSize: '18px',
@@ -253,22 +255,22 @@ export default class SettingsScene extends Phaser.Scene {
       this._saveAndApply();
       this._goBack();
     });
-    btn.on('pointerover', () => btn.setFillStyle(0x66bb6a));
-    btn.on('pointerout', () => btn.setFillStyle(0x4caf50));
+    btn.on('pointerover', () => btn.setFillStyle(0x5e35b1));
+    btn.on('pointerout', () => btn.setFillStyle(0x4527a0));
 
     // Tombol Batal
     const cancelY = btnY + 58;
     this.add.text(cx, cancelY, 'Batal', {
       fontSize: '14px',
-      color: '#888888',
+      color: '#9fa8da',
       fontFamily: 'Arial'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this._goBack())
-      .on('pointerover', function() { this.setColor('#bbbbbb'); })
-      .on('pointerout', function() { this.setColor('#888888'); });
+      .on('pointerover', function() { this.setColor('#ce93d8'); })
+      .on('pointerout', function() { this.setColor('#9fa8da'); });
 
     // Version
-    this.add.text(cx, H - 10, 'v16', {
+    this.add.text(cx, H - 10, 'v17', {
       fontSize: '10px',
       color: '#555555',
       fontFamily: 'Arial'
@@ -328,20 +330,20 @@ export default class SettingsScene extends Phaser.Scene {
 
   _drawToggle(g, x, y, w, h, on) {
     g.clear();
-    g.fillStyle(on ? 0x4caf50 : 0x555555, 1);
+    g.fillStyle(on ? 0x7c4dff : 0x424242, 1);
     g.fillRoundedRect(x, y, w, h, h / 2);
-    g.lineStyle(1, 0xffffff, 0.2);
+    g.lineStyle(1, 0xce93d8, 0.3);
     g.strokeRoundedRect(x, y, w, h, h / 2);
     const handleX = on ? (x + w - h / 2 - 3) : (x + h / 2 + 3);
     const handleY = y + h / 2;
-    g.fillStyle(0xffffff, 1);
+    g.fillStyle(0xe0e0e0, 1);
     g.fillCircle(handleX, handleY, h / 2 - 4);
     g._toggleState = !!on;
   }
 
   _drawSliderFill() {
     this.sliderFill.clear();
-    this.sliderFill.fillStyle(0x4caf50, 1);
+    this.sliderFill.fillStyle(0x7c4dff, 1);
     this.sliderFill.fillRoundedRect(
       this._sliderX, this._sliderY - this._sliderH / 2,
       this.volume * this._sliderW, this._sliderH * 2, 4
@@ -351,19 +353,19 @@ export default class SettingsScene extends Phaser.Scene {
   _updateStatus() {
     if (!this.bgmEnabled && !this.sfxEnabled) {
       this.statusText.setText('Semua suara dimatikan');
-      this.statusText.setColor('#888888');
+      this.statusText.setColor('#9fa8da');
     } else if (this.volume === 0) {
       this.statusText.setText('Volume 0% — tidak terdengar');
-      this.statusText.setColor('#888888');
+      this.statusText.setColor('#9fa8da');
     } else if (this.bgmEnabled && this.sfxEnabled) {
       this.statusText.setText('Musik & efek suara aktif');
-      this.statusText.setColor('#90ee90');
+      this.statusText.setColor('#ce93d8');
     } else if (this.bgmEnabled) {
       this.statusText.setText('Hanya musik latar yang aktif');
-      this.statusText.setColor('#90caf9');
+      this.statusText.setColor('#80deea');
     } else {
       this.statusText.setText('Hanya efek suara yang aktif');
-      this.statusText.setColor('#ffd700');
+      this.statusText.setColor('#ce93d8');
     }
   }
 

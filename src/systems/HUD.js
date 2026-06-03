@@ -32,22 +32,22 @@ export default class HUD {
     const panelX = cx - panelW / 2;
     const panelY = 6;
 
-    // ========== Panel rounded dengan border hijau ==========
+    // ========== Panel rounded dengan border ungu (GrimPass) ==========
     this.panel = this.scene.add.graphics();
-    this.panel.fillStyle(0x0d1b2a, 0.72);
+    this.panel.fillStyle(0x0d001a, 0.78);
     this.panel.fillRoundedRect(panelX, panelY, panelW, panelH, 12);
-    this.panel.lineStyle(1.5, 0x4caf50, 0.55);
+    this.panel.lineStyle(1.5, 0x7c4dff, 0.55);
     this.panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 12);
     this.panel.setScrollFactor(0).setDepth(49);
 
     // garis divider vertikal di tengah panel
-    this.panel.lineStyle(1, 0xffffff, 0.12);
+    this.panel.lineStyle(1, 0xce93d8, 0.15);
     this.panel.lineBetween(cx, panelY + 10, cx, panelY + panelH - 10);
 
     // ========== Style helper ==========
     const lbl = {
       fontSize: '10px',
-      color: '#90a4ae',
+      color: '#9fa8da',
       fontFamily: 'Arial',
       fontStyle: 'bold'
     };
@@ -65,32 +65,32 @@ export default class HUD {
 
     // ========== Baris 1: NYAWA (kiri) + SKOR (kanan) ==========
     const r1 = panelY + 22;
-    this.livesLbl = this.scene.add.text(cx - panelW / 4, r1 - 13, 'NYAWA', lbl)
+    this.livesLbl = this.scene.add.text(cx - panelW / 4, r1 - 13, 'JIWA', lbl)
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
     this.livesText = this.scene.add.text(cx - panelW / 4, r1 + 3, '♥ ' + this.lives, val('#ff5252', valSize))
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
 
     this.scoreLbl = this.scene.add.text(cx + panelW / 4, r1 - 13, 'SKOR', lbl)
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
-    this.scoreText = this.scene.add.text(cx + panelW / 4, r1 + 3, '★ ' + this.score, val('#ffeb3b', valSize))
+    this.scoreText = this.scene.add.text(cx + panelW / 4, r1 + 3, '✦ ' + this.score, val('#ce93d8', valSize))
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
 
     // ========== Baris 2: Level name (tengah, di atas divider) ==========
     const r2 = panelY + 52;
     const levelLabel = 'Lv ' + this.level + (this.levelName ? '  ·  ' + this.levelName : '');
-    this.levelText = this.scene.add.text(cx, r2, levelLabel, val('#ffffff', subSize))
+    this.levelText = this.scene.add.text(cx, r2, levelLabel, val('#e0e0e0', subSize))
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
 
-    // ========== Baris 3: WAKTU (kiri) + KOIN (kanan) ==========
+    // ========== Baris 3: WAKTU (kiri) + JIWA TERKOIN (kanan) ==========
     const r3 = panelY + 82;
     this.timeLbl = this.scene.add.text(cx - panelW / 4, r3 - 12, 'WAKTU', lbl)
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
-    this.timeText = this.scene.add.text(cx - panelW / 4, r3 + 3, '00:00', val('#90caf9', subSize))
+    this.timeText = this.scene.add.text(cx - panelW / 4, r3 + 3, '00:00', val('#80deea', subSize))
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
 
-    this.coinLbl = this.scene.add.text(cx + panelW / 4, r3 - 12, 'KOIN', lbl)
+    this.coinLbl = this.scene.add.text(cx + panelW / 4, r3 - 12, 'JIWA', lbl)
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
-    this.coinText = this.scene.add.text(cx + panelW / 4, r3 + 3, '◉ ' + this.collectedCoins + '/' + this.totalCoins, val('#ffd700', subSize))
+    this.coinText = this.scene.add.text(cx + panelW / 4, r3 + 3, '✧ ' + this.collectedCoins + '/' + this.totalCoins, val('#80deea', subSize))
       .setOrigin(0.5).setScrollFactor(0).setDepth(50);
 
     // ========== Mute indicator (di bawah panel) ==========
@@ -145,7 +145,7 @@ export default class HUD {
     this.pauseBtn.on('pointerout', () => this.pauseBtn.setFillStyle(0x37474f, 0.85));
 
     // ========== Versi di bawah layar ==========
-    this.versionText = this.scene.add.text(cx, H - 4, 'v16', {
+    this.versionText = this.scene.add.text(cx, H - 4, 'v17', {
       fontSize: '10px',
       color: '#555555',
       fontFamily: 'Arial'
@@ -171,7 +171,7 @@ export default class HUD {
 
   setScore(s) {
     this.score = s;
-    this.scoreText.setText('★ ' + this.score);
+    this.scoreText.setText('✦ ' + this.score);
   }
 
   setTime(ms) {
@@ -186,7 +186,7 @@ export default class HUD {
 
   addCoin() {
     this.collectedCoins += 1;
-    this.coinText.setText('◉ ' + this.collectedCoins + '/' + this.totalCoins);
+    this.coinText.setText('✧ ' + this.collectedCoins + '/' + this.totalCoins);
   }
 
   setMute(muted) {
