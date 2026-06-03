@@ -32,7 +32,7 @@ class SoundManager {
     this.enabled = true;
     this.muted = false;
     this.volume = 0.5;       // v14: 0..1
-    this.soundEnabled = true; // v14: master on/off
+    this.sfxEnabled = true;  // v16: SFX (jump/coin/stomp/...) on/off
   }
 
   init() {
@@ -54,7 +54,7 @@ class SoundManager {
 
   _applyGain() {
     if (!this.masterGain) return;
-    const v = (this.soundEnabled && !this.muted) ? this.volume : 0;
+    const v = (this.sfxEnabled && !this.muted) ? this.volume : 0;
     this.masterGain.gain.value = v;
   }
 
@@ -81,22 +81,20 @@ class SoundManager {
     return this.volume;
   }
 
-  // v14: master sound on/off
-  setSoundEnabled(on) {
-    this.soundEnabled = !!on;
+  // v16: SFX on/off (efek suara: koin, lompat, musuh, dll)
+  // Tidak mempengaruhi BGM/ambient — itu diatur terpisah oleh
+  // MusicManager.setBGMEnabled().
+  setSFXEnabled(on) {
+    this.sfxEnabled = !!on;
     this._applyGain();
-    if (music) {
-      if (on) music.unmuteForSettings();
-      else music.muteForSettings();
-    }
   }
 
-  isSoundEnabled() {
-    return this.soundEnabled;
+  isSFXEnabled() {
+    return this.sfxEnabled;
   }
 
   play(type) {
-    if (!this.enabled || this.muted || !this.soundEnabled || !this.ctx) return;
+    if (!this.enabled || this.muted || !this.sfxEnabled || !this.ctx) return;
     this.resume();
     switch (type) {
       case 'jump':     this._jump();     break;

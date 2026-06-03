@@ -145,7 +145,7 @@ export default class HUD {
     this.pauseBtn.on('pointerout', () => this.pauseBtn.setFillStyle(0x37474f, 0.85));
 
     // ========== Versi di bawah layar ==========
-    this.versionText = this.scene.add.text(cx, H - 4, 'v15', {
+    this.versionText = this.scene.add.text(cx, H - 4, 'v16', {
       fontSize: '10px',
       color: '#555555',
       fontFamily: 'Arial'

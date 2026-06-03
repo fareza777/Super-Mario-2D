@@ -1,15 +1,17 @@
 /**
  * src/scenes/SettingsScene.js
  * ---------------------------------------------------------------
- * v14: Menu pengaturan suara. Bisa diakses dari IntroScene,
+ * v16: Menu pengaturan suara. Bisa diakses dari IntroScene,
  * LevelSelectScene, dan pause overlay GameScene.
  *
  * Fitur:
- *   - Toggle Suara (master on/off) — hide/show kedua SFX & BGM
- *   - Slider Volume (0-100%) — mengatur volume master
+ *   - Toggle MUSIK (BGM + ambient wind) — on/off terpisah
+ *   - Toggle EFEK SUARA (SFX: koin, lompat, musuh, dll) — on/off
+ *   - Slider VOLUME (0-100%) — mengatur volume master (kedua channel)
  *   - Tombol Kembali ke scene sebelumnya
  *
  * Settings disimpan ke localStorage agar persisten antar sesi.
+ * Format: { bgmEnabled, sfxEnabled, volume }
  * ---------------------------------------------------------------
  */
 import { sound } from '../systems/SoundManager.js';
@@ -20,9 +22,19 @@ const STORAGE_KEY = 'marioGameSettings';
 function loadSettings() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // migrasi dari format lama (soundEnabled) ke format baru
+      if (parsed.soundEnabled !== undefined &&
+          parsed.bgmEnabled === undefined) {
+        parsed.bgmEnabled = parsed.soundEnabled;
+        parsed.sfxEnabled = parsed.soundEnabled;
+        delete parsed.soundEnabled;
+      }
+      return parsed;
+    }
   } catch (e) {}
-  return { soundEnabled: true, volume: 0.5 };
+  return { bgmEnabled: true, sfxEnabled: true, volume: 0.5 };
 }
 
 function saveSettings(s) {
@@ -46,7 +58,6 @@ export default class SettingsScene extends Phaser.Scene {
     const W = cam.width;
     const H = cam.height;
     const cx = W / 2;
-    const isMobile = W < 700;
 
     // Latar
     this.add.rectangle(0, 0, W, H, 0x1a1a2e)
@@ -67,8 +78,8 @@ export default class SettingsScene extends Phaser.Scene {
     }
 
     // ========== Judul ==========
-    this.add.text(cx, 100, 'PENGATURAN', {
-      fontSize: '42px',
+    this.add.text(cx, 90, 'PENGATURAN', {
+      fontSize: '40px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
       fontStyle: 'bold',
@@ -76,26 +87,28 @@ export default class SettingsScene extends Phaser.Scene {
       strokeThickness: 5
     }).setOrigin(0.5);
 
-    this.add.text(cx, 145, 'Suara & Volume', {
-      fontSize: '16px',
+    this.add.text(cx, 130, 'Suara & Volume', {
+      fontSize: '15px',
       color: '#cccccc',
       fontFamily: 'Arial'
     }).setOrigin(0.5);
 
     // ========== Muat settings tersimpan ==========
     const s = loadSettings();
-    this.soundEnabled = s.soundEnabled;
-    this.volume = s.volume;
+    this.bgmEnabled = s.bgmEnabled !== false;
+    this.sfxEnabled = s.sfxEnabled !== false;
+    this.volume = s.volume != null ? s.volume : 0.5;
 
     // terapkan ke audio engine
     sound.setVolume(this.volume);
-    sound.setSoundEnabled(this.soundEnabled);
+    sound.setSFXEnabled(this.sfxEnabled);
+    music.setBGMEnabled(this.bgmEnabled);
 
     // ========== Panel rounded ==========
     const panelW = Math.min(W - 40, 440);
-    const panelH = 320;
+    const panelH = 390;
     const panelX = cx - panelW / 2;
-    const panelY = 180;
+    const panelY = 160;
 
     const panel = this.add.graphics();
     panel.fillStyle(0x0d1b2a, 0.8);
@@ -103,58 +116,58 @@ export default class SettingsScene extends Phaser.Scene {
     panel.lineStyle(1.5, 0x4caf50, 0.5);
     panel.strokeRoundedRect(panelX, panelY, panelW, panelH, 14);
 
-    // simpan posisi untuk dipakai ulang di _drawSliderFill
+    // simpan posisi slider
     this._sliderX = panelX + 30;
-    this._sliderY = panelY + 200;
+    this._sliderY = panelY + 270;
     this._sliderW = panelW - 60;
     this._sliderH = 8;
 
-    // ========== Baris 1: Toggle Suara ==========
-    const r1Y = panelY + 60;
-    this.add.text(panelX + 30, r1Y, 'SUARA', {
-      fontSize: '20px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      fontStyle: 'bold'
-    });
-
-    this.add.text(panelX + 30, r1Y + 26, 'Efek suara & musik', {
-      fontSize: '12px',
-      color: '#90a4ae',
-      fontFamily: 'Arial'
-    });
-
-    // Toggle (rounded rect dengan handle yang bergerak)
-    const toggleW = 70;
-    const toggleH = 32;
-    const toggleX = panelX + panelW - toggleW - 24;
-    const toggleY = r1Y - 4;
-
-    this.toggleBg = this.add.graphics();
-    this.toggleBg.setInteractive(
-      new Phaser.Geom.Rectangle(toggleX, toggleY, toggleW, toggleH),
-      Phaser.Geom.Rectangle.Contains
+    // ========== Baris 1: Toggle MUSIK (BGM + ambient) ==========
+    const r1Y = panelY + 55;
+    this._addToggleRow(
+      panelX + 30, r1Y, panelW - 60,
+      'MUSIK LATAR',
+      'Musik & ambient',
+      this.bgmEnabled,
+      (on) => {
+        this.bgmEnabled = on;
+        music.setBGMEnabled(on);
+        this._saveAndApply();
+        if (on) sound.play('click');
+      }
     );
-    this._drawToggle(this.toggleBg, toggleX, toggleY, toggleW, toggleH, this.soundEnabled);
 
-    this.toggleBg.on('pointerdown', () => {
-      this.soundEnabled = !this.soundEnabled;
-      sound.setSoundEnabled(this.soundEnabled);
-      this._drawToggle(this.toggleBg, toggleX, toggleY, toggleW, toggleH, this.soundEnabled);
-      this._saveAndApply();
-      if (this.soundEnabled) sound.play('click');
-    });
+    // garis pemisah
+    this._addDivider(panelX, panelY + 120, panelW);
 
-    // ========== Baris 2: Slider Volume ==========
-    const r2Y = panelY + 150;
-    this.add.text(panelX + 30, r2Y, 'VOLUME', {
+    // ========== Baris 2: Toggle EFEK SUARA (SFX) ==========
+    const r2Y = panelY + 145;
+    this._addToggleRow(
+      panelX + 30, r2Y, panelW - 60,
+      'EFEK SUARA',
+      'Koin, lompat, musuh, dll',
+      this.sfxEnabled,
+      (on) => {
+        this.sfxEnabled = on;
+        sound.setSFXEnabled(on);
+        this._saveAndApply();
+        if (on) sound.play('click');
+      }
+    );
+
+    // garis pemisah
+    this._addDivider(panelX, panelY + 210, panelW);
+
+    // ========== Baris 3: Slider Volume ==========
+    const r3Y = panelY + 235;
+    this.add.text(panelX + 30, r3Y, 'VOLUME', {
       fontSize: '20px',
       color: '#ffffff',
       fontFamily: 'Arial',
       fontStyle: 'bold'
     });
 
-    this.volumeLabel = this.add.text(panelX + panelW - 24, r2Y, Math.round(this.volume * 100) + '%', {
+    this.volumeLabel = this.add.text(panelX + panelW - 24, r3Y, Math.round(this.volume * 100) + '%', {
       fontSize: '18px',
       color: '#ffeb3b',
       fontFamily: 'Arial',
@@ -168,10 +181,9 @@ export default class SettingsScene extends Phaser.Scene {
     track.fillStyle(0x333333, 1);
     track.fillRoundedRect(this._sliderX, this._sliderY, this._sliderW, this._sliderH, 4);
 
-    // Fill (bagian yang sudah diisi)
     this.sliderFill = this.add.graphics();
 
-    // Handle (lingkaran draggable)
+    // Handle
     const handleR = 14;
     this.sliderHandle = this.add.circle(
       this._sliderX + this.volume * this._sliderW,
@@ -198,7 +210,7 @@ export default class SettingsScene extends Phaser.Scene {
       }
     });
 
-    // Klik di track untuk set volume langsung
+    // Klik di track
     track.setInteractive(
       new Phaser.Geom.Rectangle(this._sliderX, this._sliderY - 10, this._sliderW, this._sliderH + 20),
       Phaser.Geom.Rectangle.Contains
@@ -213,23 +225,22 @@ export default class SettingsScene extends Phaser.Scene {
       this._saveAndApply();
     });
 
-    // ========== Baris 3: Status BGM ==========
-    const r3Y = panelY + 230;
-    this.bgmStatus = this.add.text(panelX + 30, r3Y, '', {
-      fontSize: '13px',
+    // ========== Status text ==========
+    this.statusText = this.add.text(panelX + 30, panelY + panelH - 28, '', {
+      fontSize: '12px',
       color: '#aaaaaa',
       fontFamily: 'Arial',
       fontStyle: 'italic'
     });
-    this._updateBgmStatus();
+    this._updateStatus();
 
-    // ========== Tombol Kembali ==========
-    const btnY = panelY + panelH + 40;
-    const btn = this.add.rectangle(cx, btnY, 220, 52, 0x4caf50)
+    // ========== Tombol Simpan & Kembali ==========
+    const btnY = panelY + panelH + 35;
+    const btn = this.add.rectangle(cx, btnY, 220, 48, 0x4caf50)
       .setStrokeStyle(3, 0xffffff, 0.6)
       .setInteractive({ useHandCursor: true });
     this.add.text(cx, btnY, 'SIMPAN & KEMBALI', {
-      fontSize: '20px',
+      fontSize: '18px',
       color: '#ffffff',
       fontFamily: 'Arial',
       fontStyle: 'bold',
@@ -246,8 +257,8 @@ export default class SettingsScene extends Phaser.Scene {
     btn.on('pointerout', () => btn.setFillStyle(0x4caf50));
 
     // Tombol Batal
-    const cancelY = btnY + 65;
-    this.add.text(cx, cancelY, 'Kembali tanpa simpan', {
+    const cancelY = btnY + 58;
+    this.add.text(cx, cancelY, 'Batal', {
       fontSize: '14px',
       color: '#888888',
       fontFamily: 'Arial'
@@ -257,25 +268,75 @@ export default class SettingsScene extends Phaser.Scene {
       .on('pointerout', function() { this.setColor('#888888'); });
 
     // Version
-    this.add.text(cx, H - 12, 'v14', {
+    this.add.text(cx, H - 10, 'v16', {
       fontSize: '10px',
       color: '#555555',
       fontFamily: 'Arial'
     }).setOrigin(0.5, 1);
   }
 
+  // ========== helpers ==========
+
+  _addToggleRow(x, y, w, label, sublabel, initialOn, onChange) {
+    // Label
+    this.add.text(x, y, label, {
+      fontSize: '18px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      fontStyle: 'bold'
+    });
+    this.add.text(x, y + 24, sublabel, {
+      fontSize: '11px',
+      color: '#90a4ae',
+      fontFamily: 'Arial'
+    });
+
+    // Toggle di kanan
+    const toggleW = 64;
+    const toggleH = 30;
+    const toggleX = x + w - toggleW;
+    const toggleY = y;
+
+    const bg = this.add.graphics();
+    bg.setInteractive(
+      new Phaser.Geom.Rectangle(toggleX, toggleY, toggleW, toggleH),
+      Phaser.Geom.Rectangle.Contains
+    );
+    this._drawToggle(bg, toggleX, toggleY, toggleW, toggleH, initialOn);
+
+    bg.on('pointerdown', () => {
+      const newOn = !this._isToggleOn(bg, toggleX, toggleW);
+      this._drawToggle(bg, toggleX, toggleY, toggleW, toggleH, newOn);
+      onChange(newOn);
+      this._updateStatus();
+    });
+  }
+
+  _isToggleOn(g, x, w) {
+    // bandingkan warna background: hijau (4caf50) = on, abu (555555) = off
+    // pendekatan sederhana: cek x posisi handle
+    // tapi karena handle digambar ulang, kita track via fillStyle
+    // untuk simplicity, kita pakai state terakhir yang disimpan di g
+    return g._toggleState !== false;
+  }
+
+  _addDivider(panelX, y, panelW) {
+    const line = this.add.graphics();
+    line.lineStyle(1, 0xffffff, 0.08);
+    line.lineBetween(panelX + 20, y, panelX + panelW - 20, y);
+  }
+
   _drawToggle(g, x, y, w, h, on) {
     g.clear();
-    // background
     g.fillStyle(on ? 0x4caf50 : 0x555555, 1);
     g.fillRoundedRect(x, y, w, h, h / 2);
     g.lineStyle(1, 0xffffff, 0.2);
     g.strokeRoundedRect(x, y, w, h, h / 2);
-    // handle
     const handleX = on ? (x + w - h / 2 - 3) : (x + h / 2 + 3);
     const handleY = y + h / 2;
     g.fillStyle(0xffffff, 1);
     g.fillCircle(handleX, handleY, h / 2 - 4);
+    g._toggleState = !!on;
   }
 
   _drawSliderFill() {
@@ -287,22 +348,32 @@ export default class SettingsScene extends Phaser.Scene {
     );
   }
 
-  _updateBgmStatus() {
-    if (!this.soundEnabled) {
-      this.bgmStatus.setText('Semua suara dimatikan');
-      this.bgmStatus.setColor('#888888');
+  _updateStatus() {
+    if (!this.bgmEnabled && !this.sfxEnabled) {
+      this.statusText.setText('Semua suara dimatikan');
+      this.statusText.setColor('#888888');
     } else if (this.volume === 0) {
-      this.bgmStatus.setText('Volume 0% — tidak terdengar');
-      this.bgmStatus.setColor('#888888');
+      this.statusText.setText('Volume 0% — tidak terdengar');
+      this.statusText.setColor('#888888');
+    } else if (this.bgmEnabled && this.sfxEnabled) {
+      this.statusText.setText('Musik & efek suara aktif');
+      this.statusText.setColor('#90ee90');
+    } else if (this.bgmEnabled) {
+      this.statusText.setText('Hanya musik latar yang aktif');
+      this.statusText.setColor('#90caf9');
     } else {
-      this.bgmStatus.setText('Musik latar dan efek suara aktif');
-      this.bgmStatus.setColor('#90ee90');
+      this.statusText.setText('Hanya efek suara yang aktif');
+      this.statusText.setColor('#ffd700');
     }
   }
 
   _saveAndApply() {
-    saveSettings({ soundEnabled: this.soundEnabled, volume: this.volume });
-    this._updateBgmStatus();
+    saveSettings({
+      bgmEnabled: this.bgmEnabled,
+      sfxEnabled: this.sfxEnabled,
+      volume: this.volume
+    });
+    this._updateStatus();
   }
 
   _goBack() {
